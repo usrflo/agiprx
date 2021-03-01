@@ -1,0 +1,4 @@
+#!/bin/bash
+
+export SSH_ORIGINAL_COMMAND=${*:2}
+ssh -p2222 -6 -oLogLevel=QUIET -oStrictHostKeyChecking=no -oSendEnv=SSH_LOGIN_USER -i /home/bhvverband-www-data/.ssh/prx_rsa www-data@2a01:4f8:140:3228:216:3eff:fed4:45aa $SSH_ORIGINAL_COMMAND

@@ -1,0 +1,2 @@
+ALTER TABLE `container` ADD `fullname` VARCHAR(60) NULL DEFAULT NULL AFTER `label`;
+ALTER TABLE `backend` ADD `fullname` VARCHAR(60) NULL DEFAULT NULL AFTER `label`;
