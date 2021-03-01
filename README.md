@@ -66,6 +66,7 @@ See repository [AgiPrx-Setup](https://github.com/usrflo/agiprx-setup) for an aut
 - remove LXD/LXC references (AgiPrx can be used independently from LXD)
 - copy functionality, e.g. copy user permissions from one container setup to another
 - optional support of longer usernames that may become long because of projectlabel-containerlabel_techusername, see https://serverfault.com/a/1043812
+- add unit tests: there are currently only a handful of tests with no noteworthy code coverage
 
 ## Licenses
 
