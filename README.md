@@ -53,7 +53,8 @@ See repository [AgiPrx-Setup](https://github.com/usrflo/agiprx-setup) for an aut
 
 ## REST-Interface
 
-`TODO`
+See **/agiprx/src/main/java/de/agitos/agiprx/rest** for current implementation status.
+`TODO: add interface documentation`
 
 ## TODO
 
