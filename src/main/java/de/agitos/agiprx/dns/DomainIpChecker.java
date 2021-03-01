@@ -39,9 +39,9 @@ public class DomainIpChecker implements DependencyInjector {
 
 	private HAProxyProcessor haProxyProcessor;
 
-	private Set<String> trustedIpSet;
+	protected Set<String> trustedIpSet;
 
-	private String nameServer;
+	protected String nameServer;
 
 	private DnsClient dnsClient = null;
 
@@ -123,6 +123,10 @@ public class DomainIpChecker implements DependencyInjector {
 	}
 
 	public String dnsLookupIpDirect(String domainName, int type) throws NamingException {
+
+		if (dnsClient == null) {
+			dnsClient = new DnsClient(new String[] { nameServer }, 2000, 3);
+		}
 
 		ResourceRecords records = dnsClient.query(new DnsName(domainName), ResourceRecord.CLASS_INTERNET, type, true,
 				false);

@@ -17,9 +17,10 @@
 package de.agitos.agiprx.dns;
 
 import java.util.ArrayList;
+import java.util.HashSet;
 import java.util.List;
 
-import org.junit.Before;
+import org.junit.BeforeClass;
 import org.junit.Ignore;
 import org.junit.Test;
 
@@ -29,14 +30,17 @@ import de.agitos.agiprx.util.Assert;
 @Ignore
 public class DomainIpCheckerTest {
 
-	private DomainIpChecker domainIpChecker;
+	private static DomainIpChecker domainIpChecker;
 
-	@Before
-	public void setup() {
+	@BeforeClass
+	public static void setup() {
 
 		de.agitos.agiprx.AgiPrx.agiPrxRootDirectory = "src/test/resources";
 		new Config();
-		this.domainIpChecker = new DomainIpChecker();
+		domainIpChecker = new DomainIpChecker();
+		domainIpChecker.nameServer = "ns1.agitos.de";
+		domainIpChecker.trustedIpSet = new HashSet<>();
+		domainIpChecker.trustedIpSet.add("188.40.16.199");
 	}
 
 	@Test

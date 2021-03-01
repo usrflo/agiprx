@@ -48,8 +48,8 @@ public class SshProxyProcessor extends AbstractProcessor implements DependencyIn
 
 	private static SshProxyProcessor BEAN;
 
-	// TODO: enable home root directory configuration
-	private final static String HOME_ROOT_DIR = "/home/";
+	// private final static String HOME_ROOT_DIR = "/home/";
+	protected String homeRootDirectory;
 
 	// @Value("${agiprx.defaultSshKey:/opt/agiprx/etc/prx_rsa}")
 	private String defaultSshKeyFullpath;
@@ -69,6 +69,7 @@ public class SshProxyProcessor extends AbstractProcessor implements DependencyIn
 		Assert.singleton(this, BEAN);
 		BEAN = this;
 
+		homeRootDirectory = Config.getBean().getString("agiprx.homeDirectory", "/home/");
 		defaultSshKeyFullpath = Config.getBean().getString("agiprx.defaultSshKey", "/opt/agiprx/etc/prx_rsa");
 	}
 
@@ -111,7 +112,7 @@ public class SshProxyProcessor extends AbstractProcessor implements DependencyIn
 	protected void cleanupProxyUsers(Set<String> keepUsernames)
 			throws IOException, InterruptedException, AbortionException {
 
-		try (DirectoryStream<Path> directoryStream = Files.newDirectoryStream(Paths.get(HOME_ROOT_DIR))) {
+		try (DirectoryStream<Path> directoryStream = Files.newDirectoryStream(Paths.get(homeRootDirectory))) {
 			for (Path path : directoryStream) {
 
 				if (!Files.isDirectory(path)) {
@@ -255,12 +256,12 @@ public class SshProxyProcessor extends AbstractProcessor implements DependencyIn
 		}
 	}
 
-	private boolean userExists(String username) throws IOException, InterruptedException {
+	protected boolean userExists(String username) throws IOException, InterruptedException {
 		// id -u <username>: status code == 0 --> exists
 		return exec("id", "-u", username) == 0;
 	}
 
-	private void createUser(SshProxyUser prxUser) throws IOException, InterruptedException, AbortionException {
+	protected void createUser(SshProxyUser prxUser) throws IOException, InterruptedException, AbortionException {
 		exec(0, "useradd", "-d", prxUser.getHomeDirectory(), "-s", prxUser.getLoginShellScriptFile(),
 				prxUser.getProxyUsername());
 		exec(0, "mkdir", "-p", prxUser.getSshDirectory());
@@ -334,7 +335,7 @@ public class SshProxyProcessor extends AbstractProcessor implements DependencyIn
 		return buf.toString();
 	}
 
-	private class SshProxyUser {
+	protected class SshProxyUser {
 
 		private final String proxyUsername;
 
@@ -367,27 +368,27 @@ public class SshProxyProcessor extends AbstractProcessor implements DependencyIn
 		}
 
 		public String getHomeDirectory() {
-			return HOME_ROOT_DIR + proxyUsername + "/";
+			return homeRootDirectory + proxyUsername + "/";
 		}
 
 		public String getSshDirectory() {
-			return HOME_ROOT_DIR + proxyUsername + "/.ssh/";
+			return homeRootDirectory + proxyUsername + "/.ssh/";
 		}
 
 		public String getSshPrivateKeyFile() {
-			return HOME_ROOT_DIR + proxyUsername + "/.ssh/prx_rsa";
+			return homeRootDirectory + proxyUsername + "/.ssh/prx_rsa";
 		}
 
 		public String getAuthorizedKeysFile() {
-			return HOME_ROOT_DIR + proxyUsername + "/.ssh/authorized_keys";
+			return homeRootDirectory + proxyUsername + "/.ssh/authorized_keys";
 		}
 
 		public String getHushLoginFile() {
-			return HOME_ROOT_DIR + proxyUsername + "/.hushlogin";
+			return homeRootDirectory + proxyUsername + "/.hushlogin";
 		}
 
 		public String getLoginShellScriptFile() {
-			return HOME_ROOT_DIR + proxyUsername + "/sshprx.sh";
+			return homeRootDirectory + proxyUsername + "/sshprx.sh";
 		}
 
 		public Container getContainer() {

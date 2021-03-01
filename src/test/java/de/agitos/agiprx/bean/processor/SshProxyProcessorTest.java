@@ -16,6 +16,7 @@
  ******************************************************************************/
 package de.agitos.agiprx.bean.processor;
 
+import java.io.File;
 import java.io.IOException;
 import java.util.HashSet;
 import java.util.Set;
@@ -24,34 +25,48 @@ import org.junit.Before;
 import org.junit.Ignore;
 import org.junit.Test;
 
+import de.agitos.agiprx.bean.processor.SshProxyProcessor.SshProxyUser;
 import de.agitos.agiprx.exception.AbortionException;
+import de.agitos.agiprx.util.Assert;
 
+// Run this test in isolated environment, e.g. inside container
+// hint: this test needs to be executed with 'useradd/userdel' permissions
 @Ignore
 public class SshProxyProcessorTest {
+
+	private static final String TEST_ROOT_DIR = "/tmp/agiprx-home-test/";
 
 	private SshProxyProcessor sshProxyProcessor;
 
 	@Before
 	public void setup() {
-		this.sshProxyProcessor = SshProxyProcessor.getBean();
+		sshProxyProcessor = SshProxyProcessor.getBean();
+		sshProxyProcessor.homeRootDirectory = TEST_ROOT_DIR;
+		new File(sshProxyProcessor.homeRootDirectory).mkdirs();
 	}
 
 	@Test
 	public void checkDomainTest() throws IOException, InterruptedException, AbortionException {
 
+		new File(sshProxyProcessor.homeRootDirectory + "aprxkeeptest").mkdir();
+
+		SshProxyUser user1 = sshProxyProcessor.new SshProxyUser("aprxkeep-this_user1", null, "user1", null);
+		sshProxyProcessor.createUser(user1);
+
+		SshProxyUser user2 = sshProxyProcessor.new SshProxyUser("aprxremove-this_user2", null, "user2", null);
+		sshProxyProcessor.createUser(user2);
+
 		Set<String> protectUsernames = new HashSet<String>();
-		protectUsernames.add("sager");
-		protectUsernames.add("fxworld");
-		protectUsernames.add("keb");
-		protectUsernames.add("keb3");
-		protectUsernames.add("kebcms");
-		protectUsernames.add("test");
+		protectUsernames.add("aprxkeeptest");
+		protectUsernames.add("aprxkeep-this_userdir");
 
 		sshProxyProcessor.cleanupProxyUsers(protectUsernames);
 
-		// Assert.isTrue(warningMessages.isEmpty(), "There should not be warnings,
-		// instead: " + StringUtils
-		// .arrayToDelimitedString(warningMessages.toArray(new
-		// String[warningMessages.size()]), "; "));
+		Assert.isTrue(sshProxyProcessor.userExists("aprxkeep-this_user1"),
+				"user 'aprxkeep-this_user1' needs to exist / be protected from cleanup");
+		Assert.isTrue(!sshProxyProcessor.userExists("aprxremove-this_user2"),
+				"user 'aprxremove-this_user2' needs to be removed by cleanup");
+		Assert.isTrue(new File(sshProxyProcessor.homeRootDirectory + "aprxkeeptest").exists(),
+				"dir 'aprxkeeptest' needs to exist after cleanup");
 	}
 }

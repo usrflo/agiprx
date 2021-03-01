@@ -18,25 +18,14 @@ package de.agitos.agiprx.output.table;
 
 import java.io.IOException;
 
-import org.junit.Before;
-import org.junit.Ignore;
+import org.junit.Assert;
 import org.junit.Test;
 
-import de.agitos.agiprx.ConsoleWrapper;
-
-@Ignore
 public class ConsoleTableBufferTest {
-
-	private ConsoleWrapper console;
-
-	@Before
-	public void setup() {
-		this.console = ConsoleWrapper.getBean();
-	}	
 
 	@Test
 	public void checkTableOutput() throws IOException {
-	
+
 		ConsoleTableBuffer tableBuf = new ConsoleTableBuffer(69);
 		tableBuf.addColumn(new LongColumn("id", 5));
 		tableBuf.addColumn(new StringColumn("label", 15));
@@ -44,14 +33,29 @@ public class ConsoleTableBufferTest {
 		tableBuf.addColumn(new StringColumn("note", 10).setMinorImportance(true).setMaxLength(20));
 		tableBuf.addColumn(new IntegerColumn("#containers", 5));
 		tableBuf.addColumn(new IntegerColumn("#backends", 5));
-		
+
 		Row row = new Row(10L, "myLabel", null, "some note on this project, can be a bit longer, however ...", 1, 2);
 		tableBuf.addRow(row);
-		
-		row = new Row(11L, "Other label", "Ein Testprojekt mit einem etwas längeren Namen", "here a note as well, anything you can imagine", 3, null);
+
+		row = new Row(11L, "Other label", "Ein Testprojekt mit einem etwas längeren Namen",
+				"here a note as well, anything you can imagine", 3, null);
 		tableBuf.addRow(row);
 
-		tableBuf.printTable(console, "\t");
+		StringBuilder buf = new StringBuilder();
+
+		tableBuf.printTable(buf, "\t", null);
+
+		StringBuilder check = new StringBuilder();
+
+		check.append(
+				"	| id    | label           | fullname                                 | note               | #cont | #back |\n");
+		check.append(
+				"	|    10 | myLabel         |                                          | some note on this  |     1 |     2 |\n");
+		check.append(
+				"	|    11 | Other label     | Ein Testprojekt mit einem etwas längeren | here a note as wel |     3 |     0 |\n");
+		check.append("	--- 2 record(s) ---\n");
+
+		Assert.assertEquals("table output needs to match", buf.toString(), check.toString());
 	}
 
 }

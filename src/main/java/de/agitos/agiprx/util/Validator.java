@@ -41,6 +41,7 @@ public class Validator implements DependencyInjector {
 
 	private final Pattern username = Pattern.compile("^[a-z0-9-_]{2,}$");
 
+	// e.g. proj1-back2_user3
 	private final Pattern sshProxyUsername = Pattern.compile("^[a-z0-9]{2,}-[a-z0-9]{2,}_[a-z0-9-_]{2,}$");
 
 	public Validator() {
