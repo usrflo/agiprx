@@ -284,7 +284,7 @@ public class SshProxyProcessor extends AbstractProcessor implements DependencyIn
 		lines.add("export SSH_ORIGINAL_COMMAND=${*:2}");
 
 		StringBuilder buf = new StringBuilder();
-		buf.append("ssh -t -p22 -6 -oLogLevel=QUIET -oSendEnv=SSH_LOGIN_USER -oStrictHostKeyChecking=no -i ");
+		buf.append("ssh -t -A -p22 -6 -oLogLevel=QUIET -oSendEnv=SSH_LOGIN_USER -oStrictHostKeyChecking=no -i ");
 		buf.append(prxUser.getSshPrivateKeyFile()).append(" ");
 		buf.append(prxUser.getContainerUsername()).append("@").append(prxUser.getContainer().getIpv6());
 		buf.append(" $SSH_ORIGINAL_COMMAND");
