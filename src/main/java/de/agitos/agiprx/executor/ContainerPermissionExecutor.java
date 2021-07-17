@@ -35,6 +35,7 @@ import de.agitos.agiprx.output.table.Row;
 import de.agitos.agiprx.output.table.StringColumn;
 import de.agitos.agiprx.util.Assert;
 import de.agitos.agiprx.util.EmailSender;
+import de.agitos.agiprx.util.ListUtils;
 import de.agitos.agiprx.util.PasswordGenerator;
 import de.agitos.agiprx.util.SshKeyConverter;
 
@@ -384,8 +385,8 @@ public class ContainerPermissionExecutor extends AbstractExecutor {
 		} else {
 			try {
 				permissionDao.create(model);
-				permissionDao.updatePasswordsToSamePermission(model);
 				container.getContainerPermissions().add(model);
+				updatePasswordsToSamePermission(container.getContainerPermissions(), model);
 				console.printlnfStress("Inserted new permission with id %d", model.getId());
 			} catch (DuplicateKeyException e) {
 				handleCaughtException(e);
@@ -416,7 +417,8 @@ public class ContainerPermissionExecutor extends AbstractExecutor {
 		} else {
 			try {
 				permissionDao.update(model);
-				permissionDao.updatePasswordsToSamePermission(model);
+				ListUtils.replace(container.getContainerPermissions(), model);
+				updatePasswordsToSamePermission(container.getContainerPermissions(), model);
 				console.printlnfStress("Updated permission with id %d", model.getId());
 			} catch (DuplicateKeyException e) {
 				handleCaughtException(e);
@@ -439,6 +441,15 @@ public class ContainerPermissionExecutor extends AbstractExecutor {
 			console.printlnfStress("Deleted permission with id %d", model.getId());
 		} else {
 			console.printlnf("Canceled deletion");
+		}
+	}
+
+	private void updatePasswordsToSamePermission(List<ContainerPermission> containerPermissions,
+			ContainerPermission model) {
+		List<Long> changedPermissionIds = permissionDao.updatePasswordsToSamePermission(model);
+		for (long changedPermissionId : changedPermissionIds) {
+			ContainerPermission changedModel = permissionDao.find(changedPermissionId);
+			ListUtils.replace(containerPermissions, changedModel);
 		}
 	}
 

@@ -41,6 +41,7 @@ import de.agitos.agiprx.output.table.LongColumn;
 import de.agitos.agiprx.output.table.Row;
 import de.agitos.agiprx.output.table.StringColumn;
 import de.agitos.agiprx.util.Assert;
+import de.agitos.agiprx.util.ListUtils;
 import de.agitos.agiprx.util.Validator;
 import jline.console.completer.AggregateCompleter;
 import jline.console.completer.Completer;
@@ -471,6 +472,7 @@ public class BackendExecutor extends AbstractCertificateRelatedExecutor {
 		} else {
 			try {
 				backendDao.update(model);
+				ListUtils.replace(project.getBackends(), model);
 				console.printlnfStress("Updated backend with id %d", model.getId());
 			} catch (DuplicateKeyException e) {
 				handleCaughtException(e);

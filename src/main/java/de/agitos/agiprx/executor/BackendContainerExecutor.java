@@ -26,6 +26,7 @@ import de.agitos.agiprx.model.Backend;
 import de.agitos.agiprx.model.BackendContainer;
 import de.agitos.agiprx.model.Container;
 import de.agitos.agiprx.util.Assert;
+import de.agitos.agiprx.util.ListUtils;
 
 public class BackendContainerExecutor extends AbstractExecutor {
 
@@ -231,6 +232,7 @@ public class BackendContainerExecutor extends AbstractExecutor {
 		} else {
 			try {
 				backendContainerDao.update(model);
+				ListUtils.replace(backend.getBackendContainers(), model);
 				console.printlnfStress("Updated backend container reference with id %d", model.getId());
 			} catch (DuplicateKeyException e) {
 				handleCaughtException(e);

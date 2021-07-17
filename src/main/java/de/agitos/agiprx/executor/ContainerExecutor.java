@@ -38,6 +38,7 @@ import de.agitos.agiprx.output.table.LongColumn;
 import de.agitos.agiprx.output.table.Row;
 import de.agitos.agiprx.output.table.StringColumn;
 import de.agitos.agiprx.util.Assert;
+import de.agitos.agiprx.util.ListUtils;
 import de.agitos.agiprx.util.Validator;
 
 public class ContainerExecutor extends AbstractExecutor {
@@ -400,6 +401,7 @@ public class ContainerExecutor extends AbstractExecutor {
 		} else {
 			try {
 				containerDao.update(model);
+				ListUtils.replace(project.getContainers(), model);
 				console.printlnfStress("Updated container with id %d", model.getId());
 			} catch (DuplicateKeyException e) {
 				handleCaughtException(e);

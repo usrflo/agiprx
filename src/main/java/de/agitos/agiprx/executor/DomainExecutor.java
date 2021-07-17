@@ -35,6 +35,7 @@ import de.agitos.agiprx.model.CombinedCertificate;
 import de.agitos.agiprx.model.Domain;
 import de.agitos.agiprx.output.table.DomainTableFormatter;
 import de.agitos.agiprx.util.Assert;
+import de.agitos.agiprx.util.ListUtils;
 
 public class DomainExecutor extends AbstractCertificateRelatedExecutor {
 
@@ -501,6 +502,7 @@ public class DomainExecutor extends AbstractCertificateRelatedExecutor {
 		} else {
 			try {
 				domainDao.update(model);
+				ListUtils.replace(backend.getDomainForwardings(), model);
 				console.printlnfStress("Updated domain with id %d", model.getId());
 			} catch (DuplicateKeyException e) {
 				handleCaughtException(e);

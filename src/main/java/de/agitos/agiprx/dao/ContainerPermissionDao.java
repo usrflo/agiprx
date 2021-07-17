@@ -17,8 +17,10 @@
 package de.agitos.agiprx.dao;
 
 import java.sql.Types;
+import java.util.ArrayList;
 import java.util.HashSet;
 import java.util.List;
+import java.util.Map;
 import java.util.Set;
 
 import org.jasypt.encryption.pbe.PBEStringEncryptor;
@@ -196,7 +198,9 @@ public class ContainerPermissionDao extends AbstractDao implements DependencyInj
 	}
 
 	// @Transactional
-	public void updatePasswordsToSamePermission(ContainerPermission containerPermission) {
+	public List<Long> updatePasswordsToSamePermission(ContainerPermission containerPermission) {
+
+		List<Long> changedPermissionIds = new ArrayList<Long>();
 
 		try {
 			dataSourceUtils.startTransaction();
@@ -208,20 +212,39 @@ public class ContainerPermissionDao extends AbstractDao implements DependencyInj
 
 			// HINT: a reset to NULL is processed as well as a password propagation
 
-			MapSqlParameterSource parameters = new MapSqlParameterSource();
-			parameters.addValue("encryptedPassword", encryptedPassword);
-			parameters.addValue("containerId", containerPermission.getContainerId());
-			parameters.addValue("permission", containerPermission.getPermission());
-			parameters.addValue("id", containerPermission.getId());
+			MapSqlParameterSource updateParameters = new MapSqlParameterSource();
+			updateParameters.addValue("encryptedPassword", encryptedPassword);
+			updateParameters.addValue("containerId", containerPermission.getContainerId());
+			updateParameters.addValue("permission", containerPermission.getPermission());
+			updateParameters.addValue("id", containerPermission.getId());
 
-			namedParamsJdbcTemplate.update(
+			int changedRows = namedParamsJdbcTemplate.update(
 					"UPDATE `container_permission` SET " + "`password` = :encryptedPassword"
 							+ " WHERE `container_id` = :containerId AND `permission` = :permission AND `id` != :id",
-					parameters);
+					updateParameters);
+
+			if (changedRows > 0) {
+
+				MapSqlParameterSource selectParameters = new MapSqlParameterSource();
+				selectParameters.addValue("containerId", containerPermission.getContainerId());
+				selectParameters.addValue("permission", containerPermission.getPermission());
+				selectParameters.addValue("id", containerPermission.getId());
+
+				List<Map<String, Object>> queryResult = namedParamsJdbcTemplate.queryForList(
+						"SELECT `id` FROM `container_permission`"
+								+ " WHERE `container_id` = :containerId AND `permission` = :permission AND `id` != :id",
+						selectParameters);
+
+				for (Map<String, Object> row : queryResult) {
+					changedPermissionIds.add((Long) row.get("id"));
+				}
+			}
 
 		} catch (Exception e) {
 			handleUpdateError(containerPermission, e);
 		}
+
+		return changedPermissionIds;
 	}
 
 	private void initRelations(ContainerPermission containerPermission) {
