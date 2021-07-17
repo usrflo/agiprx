@@ -236,7 +236,7 @@ public class ContainerPermissionDao extends AbstractDao implements DependencyInj
 						selectParameters);
 
 				for (Map<String, Object> row : queryResult) {
-					changedPermissionIds.add((Long) row.get("id"));
+					changedPermissionIds.add(Long.valueOf((Integer) row.get("id")));
 				}
 			}
 
