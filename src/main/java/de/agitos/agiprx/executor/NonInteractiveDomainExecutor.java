@@ -179,9 +179,11 @@ public class NonInteractiveDomainExecutor extends AbstractCertificateRelatedExec
 			case REPLACE:
 				domainModification |= createOrUpdateDomain(domainOp.getDomainName(), backend, domainOp.getEnableSSL(),
 						domainOp.getRedirectToUrl(), warningMessages);
+				LOG.info("Modified domain " + domainOp.getDomainName());
 				break;
 			case DELETE:
 				domainModification |= deleteDomain(domainOp.getDomainName(), backend, warningMessages);
+				LOG.info("Deleted domain " + domainOp.getDomainName());
 				break;
 			default:
 				throw new RuntimeException("Unknown update operation '" + domainOp.getOperation() + "'");
@@ -201,6 +203,7 @@ public class NonInteractiveDomainExecutor extends AbstractCertificateRelatedExec
 				for (Domain domain : backend.getDomainForwardings()) {
 					if (!containedDomains.contains(domain.getDomain())) {
 						domainModification |= deleteDomain(domain.getDomain(), backend, warningMessages);
+						LOG.info("Deleted unreferenced domain " + domain.getDomain());
 					}
 				}
 			}
