@@ -55,6 +55,7 @@ import de.agitos.agiprx.executor.ContainerPermissionExecutor;
 import de.agitos.agiprx.executor.DomainExecutor;
 import de.agitos.agiprx.executor.HostExecutor;
 import de.agitos.agiprx.executor.MainExecutor;
+import de.agitos.agiprx.executor.NonInteractiveBackendExecutor;
 import de.agitos.agiprx.executor.NonInteractiveDomainExecutor;
 import de.agitos.agiprx.executor.NonInteractiveProjectExecutor;
 import de.agitos.agiprx.executor.ProjectExecutor;
@@ -152,6 +153,7 @@ public class AgiPrx {
 		diList.add(new HostExecutor());
 		diList.add(new MainExecutor());
 		diList.add(new NonInteractiveProjectExecutor());
+		diList.add(new NonInteractiveBackendExecutor());
 		diList.add(new NonInteractiveDomainExecutor());
 		diList.add(new ProjectExecutor());
 		diList.add(new SearchBean());

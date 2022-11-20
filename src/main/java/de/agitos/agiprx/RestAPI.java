@@ -25,6 +25,7 @@ import java.util.concurrent.TimeUnit;
 import de.agitos.agiprx.bean.Config;
 import de.agitos.agiprx.bean.processor.ProxySyncProcessor;
 import de.agitos.agiprx.rest.ApiUserStore;
+import de.agitos.agiprx.rest.BackendService;
 import de.agitos.agiprx.rest.DomainService;
 import de.agitos.agiprx.rest.MaintenanceService;
 import de.agitos.agiprx.rest.PingService;
@@ -82,6 +83,7 @@ public class RestAPI implements DependencyInjector {
 			routingBuilder.register("/test", new PingService(isMaster));
 			routingBuilder.register("/domains", new DomainService(isMaster));
 			routingBuilder.register("/projects", new ProjectService(isMaster));
+			routingBuilder.register("/backends", new BackendService(isMaster));
 			routingBuilder.register("/maintenance", new MaintenanceService(isMaster));
 
 			// TODO: enable access logs?

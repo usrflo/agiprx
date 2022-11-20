@@ -4,7 +4,7 @@
 	<modelVersion>4.0.0</modelVersion>
 	<groupId>de.agitos</groupId>
 	<artifactId>agiprx</artifactId>
-	<version>1.7</version>
+	<version>1.8</version>
 	<name>Agitos Proxy Tool</name>
 	<description>HAProxy- und SSH-Proxy-Konfiguration</description>
 	<packaging>jar</packaging>

@@ -17,7 +17,13 @@
 package de.agitos.agiprx.bean.processor;
 
 import java.io.IOException;
+import java.util.ArrayList;
 import java.util.List;
+import java.util.concurrent.Callable;
+import java.util.concurrent.ExecutionException;
+import java.util.concurrent.ExecutorService;
+import java.util.concurrent.Executors;
+import java.util.concurrent.Future;
 
 import de.agitos.agiprx.ConsoleWrapper;
 import de.agitos.agiprx.DependencyInjector;
@@ -83,42 +89,40 @@ public class ProxySyncProcessor extends AbstractProcessor implements DependencyI
 		Assert.isTrue(verbose || warningMessages != null,
 				"Use either verbose output or return warning messages by List<String>");
 
+		ExecutorService executorService = Executors.newCachedThreadPool();
+		List<Callable<List<String>>> tasks = new ArrayList<Callable<List<String>>>();
 		for (String slaveIp : slaveIpList) {
 
 			if (verbose) {
 				console.printlnfStress("Sync to %s", slaveIp);
 			}
 
-			try {
-
-				/*
-				 * The slaveSyncCommand needs to (a) sync /etc/letsencrypt, /etc/haproxy and
-				 * database to target/slave server (b) restart agiprx on target server (with
-				 * implicit config reprocessing)
-				 */
-
-				StringBuilder output = new StringBuilder();
-				StringBuilder errorOutput = new StringBuilder();
-				exec(output, errorOutput, new String[] { slaveSyncCommand, slaveIp });
-
-				if (verbose) {
-					console.printf("%s", output.toString());
+			Callable<List<String>> c = new Callable<List<String>>() {
+				@Override
+				public List<String> call() throws Exception {
+					return syncToSlaveInstance(slaveIp, verbose);
 				}
-				if (errorOutput.length() > 0) {
-					if (verbose) {
-						console.printlnfError("%s", errorOutput.toString());
-					} else {
-						warningMessages.add("Sync to " + slaveIp + " : " + errorOutput.toString());
+			};
+			tasks.add(c);
+		}
+		try {
+			List<Future<List<String>>> threadResults = executorService.invokeAll(tasks);
+
+			for (Future<List<String>> threadResult : threadResults) {
+				if (verbose) {
+					for (String warning : threadResult.get()) {
+						console.printlnfError(warning);
 					}
-				}
-
-			} catch (IOException | InterruptedException e) {
-				String errorMsg = "Sync to " + slaveIp + " failed: " + e.getMessage();
-				if (verbose) {
-					console.printlnfError(errorMsg);
 				} else {
-					warningMessages.add(errorMsg);
+					warningMessages.addAll(threadResult.get());
 				}
+			}
+
+		} catch (ExecutionException | InterruptedException e) {
+			if (verbose) {
+				console.printlnfError("sync to slave instances failed, " + e.getMessage());
+			} else {
+				warningMessages.add("sync to slave instances failed, " + e.getMessage());
 			}
 		}
 
@@ -126,6 +130,45 @@ public class ProxySyncProcessor extends AbstractProcessor implements DependencyI
 			console.printlnfStress("Updated %d slave instance(s)", slaveIpList.size());
 		}
 
+	}
+
+	private List<String> syncToSlaveInstance(String slaveIp, boolean verbose) {
+
+		List<String> warningMessages = new ArrayList<String>();
+
+		try {
+
+			/*
+			 * The slaveSyncCommand needs to (a) sync /etc/letsencrypt, /etc/haproxy and
+			 * database to target/slave server (b) restart agiprx on target server (with
+			 * implicit config reprocessing)
+			 */
+
+			StringBuilder output = new StringBuilder();
+			StringBuilder errorOutput = new StringBuilder();
+			exec(output, errorOutput, new String[] { slaveSyncCommand, slaveIp });
+
+			if (verbose) {
+				console.printf("%s", output.toString());
+			}
+			if (errorOutput.length() > 0) {
+				if (verbose) {
+					console.printlnfError("%s", errorOutput.toString());
+				} else {
+					warningMessages.add("Sync to " + slaveIp + " : " + errorOutput.toString());
+				}
+			}
+
+		} catch (IOException | InterruptedException e) {
+			String errorMsg = "Sync to " + slaveIp + " failed: " + e.getMessage();
+			if (verbose) {
+				console.printlnfError(errorMsg);
+			} else {
+				warningMessages.add(errorMsg);
+			}
+		}
+
+		return warningMessages;
 	}
 
 }
