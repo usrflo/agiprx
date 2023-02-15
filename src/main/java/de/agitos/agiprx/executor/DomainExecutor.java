@@ -432,7 +432,9 @@ public class DomainExecutor extends AbstractCertificateRelatedExecutor {
 
 			// redirect target domain
 			while (true) {
-				out = console.readLine("Redirect to URL", model.getRedirectToUrl());
+				out = console.readLine(
+						"Redirect to URL (keep path with " + Domain.REDIRECT_KEEP_PATH_PATTERN + ")",
+						model.getRedirectToUrl());
 
 				handleExitOrAbort(out);
 

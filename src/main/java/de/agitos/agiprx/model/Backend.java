@@ -31,9 +31,11 @@ public class Backend extends AbstractModel {
 
 	// temporary redirect to specific domain
 	public static final String TEMPORARY_REDIRECT_LABEL = "tempredirect";
+	public static final String TEMPORARY_PREFIX_LABEL = "tempprefix";
 
 	// permanent redirect to specific domain
 	public static final String PERMANENT_REDIRECT_LABEL = "permredirect";
+	public static final String PERMANENT_PREFIX_LABEL = "permprefix";
 
 	public static final Integer DEFAULT_PORT = 80;
 

@@ -30,6 +30,8 @@ public class Domain extends AbstractModel {
 
 	private String redirectToUrl;
 
+	public final static String REDIRECT_KEEP_PATH_PATTERN = "/*";
+
 	public String getDomain() {
 		return domain;
 	}
@@ -77,6 +79,16 @@ public class Domain extends AbstractModel {
 
 	public void setRedirectToUrl(String redirectToUrl) {
 		this.redirectToUrl = redirectToUrl;
+	}
+
+	public String getRedirectToUrlForMapping() {
+		if (this.redirectToUrl == null) {
+			return null;
+		}
+		if (this.redirectToUrl.endsWith(REDIRECT_KEEP_PATH_PATTERN)) {
+			return this.redirectToUrl.substring(0, this.redirectToUrl.length() - REDIRECT_KEEP_PATH_PATTERN.length());
+		}
+		return this.redirectToUrl;
 	}
 
 	@Override
