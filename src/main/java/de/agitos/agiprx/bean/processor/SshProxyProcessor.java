@@ -92,7 +92,7 @@ public class SshProxyProcessor extends AbstractProcessor implements DependencyIn
 
 		// HINT: all projects are processed; only user's projects are shown in verbose
 		// mode
-		for (Project project : projectDao.findAllAsAdmin(EnumSet.of(RelationType.CONTAINER))) {
+		for (Project project : projectDao.findAllAsAdmin(EnumSet.of(RelationType.CONTAINER, RelationType.PERMISSION))) {
 
 			boolean projectVerbose = verbose && userContext.isUserAllowed(project.getLabel());
 

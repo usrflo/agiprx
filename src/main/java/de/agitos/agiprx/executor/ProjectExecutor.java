@@ -165,8 +165,8 @@ public class ProjectExecutor extends AbstractCertificateRelatedExecutor {
 					backendExecutor.run(project);
 					// reload backends
 					project.setBackends(null);
-					projectDao.initRelations(project,
-							EnumSet.of(RelationType.BACKEND, RelationType.DOMAIN, RelationType.CONTAINER));
+					projectDao.initRelations(project, EnumSet.of(RelationType.BACKEND, RelationType.DOMAIN,
+							RelationType.CONTAINERREF, RelationType.CONTAINER));
 				} else if (isCommand(CMD_WRITESSHPRX, out)) {
 					sshProxyProcessor.manageConfiguration(project, true);
 					console.printlnfStress("Updated SSH user configuration on project " + project.getLabel());

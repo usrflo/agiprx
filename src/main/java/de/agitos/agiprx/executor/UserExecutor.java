@@ -480,7 +480,7 @@ public class UserExecutor extends AbstractExecutor {
 
 		console.printlnfStress("Technical user permissions of user " + user.getFullname() + ":");
 
-		for (Project project : projectDao.findAllAsAdmin(EnumSet.of(RelationType.CONTAINER))) {
+		for (Project project : projectDao.findAllAsAdmin(EnumSet.of(RelationType.CONTAINER, RelationType.PERMISSION))) {
 			for (Container container : project.getContainers()) {
 				// set back-reference
 				container.setProject(project);

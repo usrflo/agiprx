@@ -187,7 +187,8 @@ public class BackendDao extends AbstractDao implements DependencyInjector {
 			backend.setDomainForwardings(domainDao.findAllByBackend(backend.getId(), null));
 		}
 
-		if ((updateAll || relationTypes.contains(RelationType.CONTAINER)) && backend.getBackendContainers() == null) {
+		if ((updateAll || relationTypes.contains(RelationType.CONTAINERREF))
+				&& backend.getBackendContainers() == null) {
 			backend.setBackendContainers(backendContainerDao.findAllByBackend(backend.getId()));
 		}
 	}

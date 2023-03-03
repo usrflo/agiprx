@@ -144,8 +144,8 @@ public class HAProxyProcessor extends AbstractProcessor implements DependencyInj
 		}
 
 		// fetch all projects
-		List<Project> allProjects = projectDao
-				.findAllAsAdmin(EnumSet.of(RelationType.BACKEND, RelationType.DOMAIN, RelationType.CONTAINER));
+		List<Project> allProjects = projectDao.findAllAsAdmin(EnumSet.of(RelationType.BACKEND, RelationType.DOMAIN,
+				RelationType.CONTAINERREF, RelationType.CONTAINER));
 
 		// generate haproxy.cfg
 		generateAndCheckConfigFile(allProjects);

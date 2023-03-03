@@ -17,13 +17,16 @@
 package de.agitos.agiprx.dao;
 
 public enum RelationType {
+	// @formatter:off
 	ALL,
 	PROJECT,
 	BACKEND,
 	CONTAINER,
+	CONTAINERREF,
 	PERMISSION,
 	DOMAIN,
 	HOST,
 	USER,
 	NONE
+	// @formatter:on
 }
