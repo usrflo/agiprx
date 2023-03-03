@@ -212,7 +212,7 @@ public class ProjectDao extends AbstractDao implements DependencyInjector {
 		boolean updateAll = relationTypes.contains(RelationType.ALL);
 
 		if ((updateAll || relationTypes.contains(RelationType.CONTAINER)) && project.getContainers() == null) {
-			project.setContainers(containerDao.findAllByProject(project));
+			project.setContainers(containerDao.findAllByProject(project, relationTypes));
 		}
 
 		if ((updateAll || relationTypes.contains(RelationType.BACKEND)) && project.getBackends() == null) {

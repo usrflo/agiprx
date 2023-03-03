@@ -16,12 +16,14 @@
  ******************************************************************************/
 package de.agitos.agiprx.executor;
 
+import java.util.EnumSet;
 import java.util.List;
 
 import com.mysql.cj.util.StringUtils;
 
 import de.agitos.agiprx.dao.ContainerDao;
 import de.agitos.agiprx.dao.HostDao;
+import de.agitos.agiprx.dao.RelationType;
 import de.agitos.agiprx.db.exception.DuplicateKeyException;
 import de.agitos.agiprx.exception.AbortionException;
 import de.agitos.agiprx.model.Container;
@@ -235,7 +237,7 @@ public class HostExecutor extends AbstractExecutor {
 		tableBuf.addColumn(new StringColumn("fullname", 25).setMinorImportance(true));
 		tableBuf.addColumn(new StringColumn("ipv6", 40));
 
-		for (Container container : containerDao.findAllByHost(model)) {
+		for (Container container : containerDao.findAllByHost(model, EnumSet.of(RelationType.PROJECT))) {
 			// console.printlnf("\t%s", host);
 
 			Row row = new Row(container.getProject().getLabel(), container.getLabel(), container.getFullname(),
@@ -309,7 +311,7 @@ public class HostExecutor extends AbstractExecutor {
 			return false;
 		}
 
-		List<Container> containers = containerDao.findAllByHost(model);
+		List<Container> containers = containerDao.findAllByHost(model, EnumSet.of(RelationType.PROJECT));
 		if (!containers.isEmpty()) {
 			console.printlnfError(
 					"Cannot delete host, it is used in the following container(s); remove those containers first:");

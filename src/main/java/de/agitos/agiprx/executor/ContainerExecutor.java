@@ -16,6 +16,7 @@
  ******************************************************************************/
 package de.agitos.agiprx.executor;
 
+import java.util.EnumSet;
 import java.util.List;
 import java.util.Map;
 
@@ -25,6 +26,7 @@ import de.agitos.agiprx.bean.processor.LxdProcessor;
 import de.agitos.agiprx.dao.BackendContainerDao;
 import de.agitos.agiprx.dao.ContainerDao;
 import de.agitos.agiprx.dao.HostDao;
+import de.agitos.agiprx.dao.RelationType;
 import de.agitos.agiprx.dao.UserDao;
 import de.agitos.agiprx.db.exception.DuplicateKeyException;
 import de.agitos.agiprx.exception.AbortionException;
@@ -185,7 +187,7 @@ public class ContainerExecutor extends AbstractExecutor {
 		tableBuf.addColumn(new StringColumn("host", 20));
 		tableBuf.addColumn(new StringColumn("ipv6", 40));
 
-		for (Container model : containerDao.findAllByProject(project)) {
+		for (Container model : containerDao.findAllByProject(project, EnumSet.of(RelationType.HOST))) {
 			// console.printlnf("\t%s", model);
 
 			Row row = new Row(model.getId(),
@@ -199,7 +201,7 @@ public class ContainerExecutor extends AbstractExecutor {
 	}
 
 	private Container fetchIfSingle(Project project) {
-		List<Container> list = containerDao.findAllByProject(project);
+		List<Container> list = containerDao.findAllByProject(project, EnumSet.of(RelationType.ALL));
 		if (list == null || list.size() != 1) {
 			return null;
 		}

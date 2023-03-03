@@ -121,16 +121,18 @@ public class Container extends AbstractModel {
 		StringBuilder buf = new StringBuilder();
 
 		buf.append(linePrefix).append(this.toString()).append("\n");
-		if (this.getContainerPermissions().isEmpty()) {
-			buf.append(linePrefix).append("# No permissions defined\n");
-		} else {
-			buf.append(linePrefix).append("# Permissions\n");
-			buf.append(ConsoleWrapper.ANSI_RESET);
-			for (ContainerPermission permission : this.getContainerPermissions()) {
-				permission.setContainer(this);
-				buf.append(linePrefix).append(permission.getUser().getFullname()).append(": ")
-						.append(permission.getSshProxyUsername()).append(" -> ").append(permission.getPermission())
-						.append("\n");
+		if (this.getContainerPermissions() != null) {
+			if (this.getContainerPermissions().isEmpty()) {
+				buf.append(linePrefix).append("# No permissions defined\n");
+			} else {
+				buf.append(linePrefix).append("# Permissions\n");
+				buf.append(ConsoleWrapper.ANSI_RESET);
+				for (ContainerPermission permission : this.getContainerPermissions()) {
+					permission.setContainer(this);
+					buf.append(linePrefix).append(permission.getUser().getFullname()).append(": ")
+							.append(permission.getSshProxyUsername()).append(" -> ").append(permission.getPermission())
+							.append("\n");
+				}
 			}
 		}
 		buf.append(ConsoleWrapper.ANSI_GREEN);

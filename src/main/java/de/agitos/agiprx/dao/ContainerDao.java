@@ -19,6 +19,7 @@ package de.agitos.agiprx.dao;
 import java.sql.Types;
 import java.util.Collections;
 import java.util.Comparator;
+import java.util.EnumSet;
 import java.util.HashSet;
 import java.util.List;
 import java.util.Set;
@@ -132,7 +133,7 @@ public class ContainerDao extends AbstractDao implements DependencyInjector {
 			Container container = jdbcTemplate.queryForObject(SELECT_ALL_STMT + " WHERE id = ?", new Object[] { id },
 					new int[] { Types.NUMERIC }, new ContainerRowMapper());
 
-			initRelations(container);
+			initRelations(container, EnumSet.of(RelationType.ALL));
 
 			return container;
 
@@ -147,7 +148,7 @@ public class ContainerDao extends AbstractDao implements DependencyInjector {
 					new Object[] { project.getId(), label }, new int[] { Types.NUMERIC, Types.VARCHAR },
 					new ContainerRowMapper());
 
-			initRelations(container);
+			initRelations(container, EnumSet.of(RelationType.ALL));
 
 			return container;
 
@@ -156,23 +157,23 @@ public class ContainerDao extends AbstractDao implements DependencyInjector {
 		}
 	}
 
-	public List<Container> findAll() {
+	public List<Container> findAll(EnumSet<RelationType> relationTypes) {
 		List<Container> result = jdbcTemplate.query(SELECT_ALL_STMT, new ContainerRowMapper());
 
 		for (Container container : result) {
-			initRelations(container);
+			initRelations(container, relationTypes);
 		}
 
 		return result;
 	}
 
-	public List<Container> findAllByProject(Project project) {
+	public List<Container> findAllByProject(Project project, EnumSet<RelationType> relationTypes) {
 		List<Container> result = jdbcTemplate.query(SELECT_ALL_STMT + " WHERE project_id = ?",
 				new Object[] { project.getId() }, new int[] { Types.NUMERIC }, new ContainerRowMapper());
 
 		for (Container container : result) {
 			container.setProject(project);
-			initRelations(container);
+			initRelations(container, relationTypes);
 		}
 
 		return result;
@@ -188,13 +189,13 @@ public class ContainerDao extends AbstractDao implements DependencyInjector {
 		return result;
 	}
 
-	public List<Container> findAllByHost(Host host) {
+	public List<Container> findAllByHost(Host host, EnumSet<RelationType> relationTypes) {
 		List<Container> result = jdbcTemplate.query(SELECT_ALL_STMT + " WHERE host_id = ?",
 				new Object[] { host.getId() }, new int[] { Types.NUMERIC }, new ContainerRowMapper());
 
 		for (Container container : result) {
 			container.setHost(host);
-			initRelations(container);
+			initRelations(container, relationTypes);
 		}
 
 		Collections.sort(result, new Comparator<Container>() {
@@ -218,18 +219,30 @@ public class ContainerDao extends AbstractDao implements DependencyInjector {
 				new int[] { Types.VARCHAR }, new ContainerRowMapper());
 
 		for (Container container : result) {
-			initRelations(container);
+			initRelations(container, EnumSet.of(RelationType.ALL));
 		}
 
 		return result;
 	}
 
-	private void initRelations(Container container) {
-		container.setContainerPermissions(containerPermissionDao.findAllByContainer(container.getId()));
-		if (container.getHost() == null) {
+	private void initRelations(Container container, EnumSet<RelationType> relationTypes) {
+
+		if (relationTypes == null) {
+			return;
+		}
+
+		boolean updateAll = relationTypes.contains(RelationType.ALL);
+
+		if ((updateAll || relationTypes.contains(RelationType.PERMISSION))
+				&& container.getContainerPermissions() == null) {
+			container.setContainerPermissions(containerPermissionDao.findAllByContainer(container.getId()));
+		}
+
+		if ((updateAll || relationTypes.contains(RelationType.HOST)) && container.getHost() == null) {
 			container.setHost(hostDao.find(container.getHostId()));
 		}
-		if (container.getProject() == null) {
+
+		if ((updateAll || relationTypes.contains(RelationType.PROJECT)) && container.getProject() == null) {
 			container.setProject(projectDao.find(container.getProjectId(), null));
 		}
 	}
@@ -265,7 +278,7 @@ public class ContainerDao extends AbstractDao implements DependencyInjector {
 		try {
 			dataSourceUtils.startTransaction();
 
-			initRelations(model);
+			initRelations(model, EnumSet.of(RelationType.PERMISSION));
 
 			for (ContainerPermission permission : model.getContainerPermissions()) {
 				containerPermissionDao.delete(permission);
