@@ -53,13 +53,13 @@ public class BackendService extends AbstractService {
 
 	@Override
 	public void update(Rules rules) {
-		rules.put("/{+projectLabel}", WebSecurity.authenticate(),
+		rules.post("/{+projectLabel}", WebSecurity.authenticate(),
 				Handler.create(BackendDto.class, (req, res, backendDto) -> res.send(putBackend(req, res, backendDto))));
 		rules.patch("/{+projectLabel}/{+backendLabel}/setContainersOf/{+targetBackendLabel}",
 				WebSecurity.authenticate(), this::setContainersOfTargetBackend);
 	}
 
-	// Sample PUT-Request:
+	// Sample POST-Request:
 	// {
 	// "label": "label1",
 	// "fullname": "fullname1",

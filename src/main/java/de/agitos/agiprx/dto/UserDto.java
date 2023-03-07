@@ -16,11 +16,14 @@
  ******************************************************************************/
 package de.agitos.agiprx.dto;
 
+import javax.json.bind.annotation.JsonbTransient;
+
 import de.agitos.agiprx.model.User;
 import de.agitos.agiprx.model.UserRoleType;
 
 public class UserDto {
 
+	@JsonbTransient
 	private User user;
 
 	public UserDto(User user) {

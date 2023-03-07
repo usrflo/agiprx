@@ -16,11 +16,14 @@
  ******************************************************************************/
 package de.agitos.agiprx.dto;
 
+import javax.json.bind.annotation.JsonbTransient;
+
 import de.agitos.agiprx.model.ContainerPermission;
 import de.agitos.agiprx.model.User;
 
 public class ContainerPermissionDto {
 
+	@JsonbTransient
 	private ContainerPermission containerPermission;
 
 	public ContainerPermissionDto() {

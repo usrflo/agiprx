@@ -19,12 +19,15 @@ package de.agitos.agiprx.dto;
 import java.util.ArrayList;
 import java.util.List;
 
+import javax.json.bind.annotation.JsonbTransient;
+
 import de.agitos.agiprx.model.Container;
 import de.agitos.agiprx.model.ContainerPermission;
 import de.agitos.agiprx.model.Host;
 
 public class ContainerDto {
 
+	@JsonbTransient
 	private Container container;
 
 	public ContainerDto() {

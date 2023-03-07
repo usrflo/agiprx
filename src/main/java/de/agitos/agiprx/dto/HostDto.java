@@ -16,10 +16,13 @@
  ******************************************************************************/
 package de.agitos.agiprx.dto;
 
+import javax.json.bind.annotation.JsonbTransient;
+
 import de.agitos.agiprx.model.Host;
 
 public class HostDto {
 
+	@JsonbTransient
 	private Host host;
 
 	public HostDto(Host host) {

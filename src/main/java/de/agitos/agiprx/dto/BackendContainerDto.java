@@ -16,10 +16,13 @@
  ******************************************************************************/
 package de.agitos.agiprx.dto;
 
+import javax.json.bind.annotation.JsonbTransient;
+
 import de.agitos.agiprx.model.BackendContainer;
 
 public class BackendContainerDto {
 
+	@JsonbTransient
 	private BackendContainer backendContainer;
 
 	public BackendContainerDto() {

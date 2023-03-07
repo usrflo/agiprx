@@ -16,10 +16,13 @@
  ******************************************************************************/
 package de.agitos.agiprx.dto;
 
+import javax.json.bind.annotation.JsonbTransient;
+
 import de.agitos.agiprx.model.Domain;
 
 public class DomainDto {
 
+	@JsonbTransient
 	private Domain domain;
 
 	public DomainDto() {

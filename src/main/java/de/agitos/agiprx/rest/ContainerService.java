@@ -53,11 +53,11 @@ public class ContainerService extends AbstractService {
 
 	@Override
 	public void update(Rules rules) {
-		rules.put("/{+projectLabel}", WebSecurity.authenticate(), Handler.create(ContainerDto.class,
+		rules.post("/{+projectLabel}", WebSecurity.authenticate(), Handler.create(ContainerDto.class,
 				(req, res, containerDto) -> res.send(putContainer(req, res, containerDto))));
 	}
 
-	// Sample PUT-Request:
+	// Sample POST-Request:
 	// {
 	// "label": "clabel1",
 	// "fullname": "cfullname1",

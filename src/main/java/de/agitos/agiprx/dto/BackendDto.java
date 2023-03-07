@@ -19,12 +19,15 @@ package de.agitos.agiprx.dto;
 import java.util.ArrayList;
 import java.util.List;
 
+import javax.json.bind.annotation.JsonbTransient;
+
 import de.agitos.agiprx.model.Backend;
 import de.agitos.agiprx.model.BackendContainer;
 import de.agitos.agiprx.model.Domain;
 
 public class BackendDto {
 
+	@JsonbTransient
 	private Backend backend;
 
 	public BackendDto() {
