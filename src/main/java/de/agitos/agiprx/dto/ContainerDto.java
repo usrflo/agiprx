@@ -21,10 +21,15 @@ import java.util.List;
 
 import de.agitos.agiprx.model.Container;
 import de.agitos.agiprx.model.ContainerPermission;
+import de.agitos.agiprx.model.Host;
 
 public class ContainerDto {
 
 	private Container container;
+
+	public ContainerDto() {
+		this.container = new Container();
+	}
 
 	public ContainerDto(Container container) {
 		this.container = container;
@@ -34,8 +39,16 @@ public class ContainerDto {
 		return container.getLabel();
 	}
 
+	public void setLabel(String label) {
+		container.setLabel(label);
+	}
+
 	public String getFullname() {
 		return container.getFullname();
+	}
+
+	public void setFullname(String fullname) {
+		container.setFullname(fullname);
 	}
 
 	public Long getProjectId() {
@@ -50,8 +63,27 @@ public class ContainerDto {
 		return new HostDto(container.getHost());
 	}
 
+	public void setHost(Host host) {
+		container.setHost(host);
+	}
+
+	public void setHostname(String hostname) {
+		if (container.getHost() == null) {
+			container.setHost(new Host());
+		}
+		container.getHost().setHostname(hostname);
+	}
+
+	public String getHostname() {
+		return container.getHost().getHostname();
+	}
+
 	public String getIpv6() {
 		return container.getIpv6();
+	}
+
+	public void setIpv6(String ipv6) {
+		container.setIpv6(ipv6);
 	}
 
 	public List<ContainerPermissionDto> getContainerPermissions() {
@@ -65,11 +97,25 @@ public class ContainerDto {
 		return result;
 	}
 
+	public void setContainerPermissions(ArrayList<ContainerPermissionDto> containerPermissionsDto) {
+		List<ContainerPermission> containerPermissions = new ArrayList<>();
+
+		for (ContainerPermissionDto containerPermissionDto : containerPermissionsDto) {
+			containerPermissions.add(containerPermissionDto.getContainerPermission());
+		}
+
+		container.setContainerPermissions(containerPermissions);
+	}
+
 	public String getFQLabel() {
 		return container.getFQLabel();
 	}
 
 	public Integer getVersion() {
 		return container.getVersion();
+	}
+
+	public Container getContainer() {
+		return container;
 	}
 }

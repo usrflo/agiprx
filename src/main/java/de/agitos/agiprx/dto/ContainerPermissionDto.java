@@ -17,10 +17,15 @@
 package de.agitos.agiprx.dto;
 
 import de.agitos.agiprx.model.ContainerPermission;
+import de.agitos.agiprx.model.User;
 
 public class ContainerPermissionDto {
 
 	private ContainerPermission containerPermission;
+
+	public ContainerPermissionDto() {
+		this.containerPermission = new ContainerPermission();
+	}
 
 	public ContainerPermissionDto(ContainerPermission containerPermission) {
 		this.containerPermission = containerPermission;
@@ -34,12 +39,24 @@ public class ContainerPermissionDto {
 		return containerPermission.getUserId();
 	}
 
+	public void setUserId(Long userId) {
+		containerPermission.setUserId(userId);
+	}
+
 	public UserDto getUser() {
 		return new UserDto(containerPermission.getUser());
 	}
 
+	public void setUser(User user) {
+		containerPermission.setUser(user);
+	}
+
 	public String getPermission() {
 		return containerPermission.getPermission();
+	}
+
+	public void setPermission(String permission) {
+		containerPermission.setPermission(permission);
 	}
 
 	public String getSshProxyUsername() {
@@ -48,5 +65,9 @@ public class ContainerPermissionDto {
 
 	public Integer getVersion() {
 		return containerPermission.getVersion();
+	}
+
+	public ContainerPermission getContainerPermission() {
+		return containerPermission;
 	}
 }

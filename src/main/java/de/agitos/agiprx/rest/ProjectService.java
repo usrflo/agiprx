@@ -25,15 +25,15 @@ import io.helidon.security.integration.webserver.WebSecurity;
 import io.helidon.webserver.Routing.Rules;
 import io.helidon.webserver.ServerRequest;
 import io.helidon.webserver.ServerResponse;
-import io.helidon.webserver.Service;
 
-public class ProjectService implements Service {
+public class ProjectService extends AbstractService {
 
 	NonInteractiveProjectExecutor nonInteractiveProjectExecutor;
 
 	UserContext userContext;
 
 	public ProjectService(boolean isMaster) {
+		super(isMaster);
 		userContext = UserContext.getBean();
 		nonInteractiveProjectExecutor = NonInteractiveProjectExecutor.getBean();
 	}

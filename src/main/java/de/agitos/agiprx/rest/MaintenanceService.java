@@ -22,18 +22,15 @@ import io.helidon.security.integration.webserver.WebSecurity;
 import io.helidon.webserver.Routing.Rules;
 import io.helidon.webserver.ServerRequest;
 import io.helidon.webserver.ServerResponse;
-import io.helidon.webserver.Service;
 
-public class MaintenanceService implements Service {
+public class MaintenanceService extends AbstractService {
 
 	private static final String MAINTENANCE_THREAD_NAME = "MainMaintenanceJob";
 
 	private static boolean maintenanceRunning = false;
 
-	private final boolean isMaster;
-
 	public MaintenanceService(boolean isMaster) {
-		this.isMaster = isMaster;
+		super(isMaster);
 	}
 
 	@Override
@@ -48,9 +45,7 @@ public class MaintenanceService implements Service {
 	// @formatter:on
 	private void startMaintenance(ServerRequest serverRequest, ServerResponse serverResponse) {
 
-		if (!isMaster) {
-			serverResponse.status(ResponseStatus.create(405 /* Method not allowed */,
-					"Job needs to be started on master instance (this is a slave instance)")).send();
+		if (!validateMasterInstance(serverResponse)) {
 			return;
 		}
 

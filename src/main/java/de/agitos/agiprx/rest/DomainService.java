@@ -25,16 +25,14 @@ import de.agitos.agiprx.dto.MassDomainUpdateDto;
 import de.agitos.agiprx.executor.NonInteractiveDomainExecutor;
 import de.agitos.agiprx.util.UserContext;
 import io.helidon.common.http.Http;
-import io.helidon.common.http.Http.ResponseStatus;
 import io.helidon.security.integration.webserver.WebSecurity;
 import io.helidon.webserver.Handler;
 import io.helidon.webserver.HttpException;
 import io.helidon.webserver.Routing.Rules;
 import io.helidon.webserver.ServerRequest;
 import io.helidon.webserver.ServerResponse;
-import io.helidon.webserver.Service;
 
-public class DomainService implements Service {
+public class DomainService extends AbstractService {
 
 	NonInteractiveDomainExecutor nonInteractiveDomainExecutor;
 
@@ -42,10 +40,8 @@ public class DomainService implements Service {
 
 	UserContext userContext;
 
-	private final boolean isMaster;
-
 	public DomainService(boolean isMaster) {
-		this.isMaster = isMaster;
+		super(isMaster);
 		userContext = UserContext.getBean();
 		nonInteractiveDomainExecutor = NonInteractiveDomainExecutor.getBean();
 		proxySyncProcessor = ProxySyncProcessor.getBean();
@@ -63,9 +59,7 @@ public class DomainService implements Service {
 	private List<String> massUpdate(ServerRequest serverRequest, ServerResponse serverResponse,
 			MassDomainUpdateDto massDomainUpdate) {
 
-		if (!isMaster) {
-			serverResponse.status(ResponseStatus.create(405 /* Method not allowed */,
-					"Update needs to be started on master instance (this is a slave instance)")).send();
+		if (!validateMasterInstance(serverResponse)) {
 			return null;
 		}
 

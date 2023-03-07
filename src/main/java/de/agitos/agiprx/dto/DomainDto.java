@@ -22,12 +22,22 @@ public class DomainDto {
 
 	private Domain domain;
 
+	public DomainDto() {
+		this.domain = new Domain();
+		this.domain.setLetsEncrypt(false);
+		this.domain.setCertProvided(false);
+	}
+
 	public DomainDto(Domain domain) {
 		this.domain = domain;
 	}
 
 	public String getDomainName() {
 		return domain.getDomain();
+	}
+
+	public void setDomainName(String domainName) {
+		this.domain.setDomain(domainName);
 	}
 
 	public Integer getVersion() {
@@ -42,11 +52,27 @@ public class DomainDto {
 		return domain.getLetsEncrypt();
 	}
 
+	public void setLetsEncrypt(Boolean letsEncrypt) {
+		this.domain.setLetsEncrypt(letsEncrypt);
+	}
+
 	public Boolean getCertProvided() {
 		return domain.getCertProvided();
 	}
 
+	public void setCertProvided(Boolean certProvided) {
+		this.domain.setCertProvided(certProvided);
+	}
+
 	public String getRedirectToUrl() {
 		return domain.getRedirectToUrl();
+	}
+
+	public void setRedirectToUrl(String redirectToUrl) {
+		this.domain.setRedirectToUrl(redirectToUrl);
+	}
+
+	public Domain getDomain() {
+		return this.domain;
 	}
 }

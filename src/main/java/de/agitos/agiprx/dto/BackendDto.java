@@ -27,6 +27,10 @@ public class BackendDto {
 
 	private Backend backend;
 
+	public BackendDto() {
+		this.backend = new Backend();
+	}
+
 	public BackendDto(Backend backend) {
 		this.backend = backend;
 	}
@@ -35,20 +39,40 @@ public class BackendDto {
 		return backend.getLabel();
 	}
 
+	public void setLabel(String label) {
+		backend.setLabel(label);
+	}
+
 	public String getFullname() {
 		return backend.getFullname();
+	}
+
+	public void setFullname(String fullname) {
+		backend.setFullname(fullname);
 	}
 
 	public Long getProjectId() {
 		return backend.getProjectId();
 	}
 
+	public void setProjectId(Long projectId) {
+		backend.setProjectId(projectId);
+	}
+
 	public Integer getPort() {
 		return backend.getPort();
 	}
 
+	public void setPort(Integer port) {
+		backend.setPort(port);
+	}
+
 	public String getParams() {
 		return backend.getParams();
+	}
+
+	public void setParams(String params) {
+		backend.setParams(params);
 	}
 
 	public List<DomainDto> getDomainForwardings() {
@@ -62,6 +86,16 @@ public class BackendDto {
 		return result;
 	}
 
+	public void setDomainForwardings(ArrayList<DomainDto> domainForwardingsDto) {
+		List<Domain> domains = new ArrayList<>();
+
+		for (DomainDto domainDto : domainForwardingsDto) {
+			domains.add(domainDto.getDomain());
+		}
+
+		backend.setDomainForwardings(domains);
+	}
+
 	public List<BackendContainerDto> getBackendContainers() {
 		List<BackendContainerDto> result = new ArrayList<>();
 		if (backend.getBackendContainers() == null) {
@@ -71,6 +105,16 @@ public class BackendDto {
 			result.add(new BackendContainerDto(backendContainer));
 		}
 		return result;
+	}
+
+	public void setBackendContainers(ArrayList<BackendContainerDto> backendContainersDto) {
+		List<BackendContainer> backendContainers = new ArrayList<>();
+
+		for (BackendContainerDto backendContainerDto : backendContainersDto) {
+			backendContainers.add(backendContainerDto.getBackendContainer());
+		}
+
+		backend.setBackendContainers(backendContainers);
 	}
 
 	public String getFQLabel() {
@@ -83,5 +127,9 @@ public class BackendDto {
 
 	public Integer getVersion() {
 		return backend.getVersion();
+	}
+
+	public Backend getBackend() {
+		return this.backend;
 	}
 }

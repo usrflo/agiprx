@@ -16,23 +16,25 @@
  ******************************************************************************/
 package de.agitos.agiprx.rest;
 
+import java.util.AbstractMap.SimpleImmutableEntry;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.logging.Level;
 import java.util.logging.Logger;
 
 import de.agitos.agiprx.bean.processor.ProxySyncProcessor;
+import de.agitos.agiprx.dto.BackendDto;
 import de.agitos.agiprx.executor.NonInteractiveBackendExecutor;
 import de.agitos.agiprx.util.UserContext;
 import io.helidon.common.http.Http;
 import io.helidon.security.integration.webserver.WebSecurity;
+import io.helidon.webserver.Handler;
 import io.helidon.webserver.HttpException;
 import io.helidon.webserver.Routing.Rules;
 import io.helidon.webserver.ServerRequest;
 import io.helidon.webserver.ServerResponse;
-import io.helidon.webserver.Service;
 
-public class BackendService implements Service {
+public class BackendService extends AbstractService {
 
 	private static final Logger LOG = Logger.getLogger(BackendService.class.getName());
 
@@ -42,10 +44,8 @@ public class BackendService implements Service {
 
 	UserContext userContext;
 
-	private final boolean isMaster;
-
 	public BackendService(boolean isMaster) {
-		this.isMaster = isMaster;
+		super(isMaster);
 		userContext = UserContext.getBean();
 		nonInteractiveBackendExecutor = NonInteractiveBackendExecutor.getBean();
 		proxySyncProcessor = ProxySyncProcessor.getBean();
@@ -53,13 +53,63 @@ public class BackendService implements Service {
 
 	@Override
 	public void update(Rules rules) {
+		rules.put("/{+projectLabel}", WebSecurity.authenticate(),
+				Handler.create(BackendDto.class, (req, res, backendDto) -> res.send(putBackend(req, res, backendDto))));
 		rules.patch("/{+projectLabel}/{+backendLabel}/setContainersOf/{+targetBackendLabel}",
 				WebSecurity.authenticate(), this::setContainersOfTargetBackend);
+	}
+
+	// Sample PUT-Request:
+	// {
+	// "label": "label1",
+	// "fullname": "fullname1",
+	// "port": "3306",
+	// "params": null,
+	// "domainForwardings": [{
+	// "domain": "foo1.agitos.de",
+	// "certProvided": true
+	// }],
+	// "backendContainers": [{
+	// "containerId": 1
+	// }]
+	// }
+	private ServiceResult putBackend(ServerRequest serverRequest, ServerResponse serverResponse, BackendDto backend) {
+
+		if (!validateMasterInstance(serverResponse)) {
+			return null;
+		}
+
+		try {
+			String projectLabel = serverRequest.path().param("projectLabel");
+
+			userContext.registerApiUser(RestServiceUtil.getUsername(serverRequest));
+
+			Long backendId = nonInteractiveBackendExecutor.createOrUpdateBackend(projectLabel, backend);
+
+			List<String> warningMessages = new ArrayList<>();
+
+			return ServiceResult.create(new SimpleImmutableEntry<String, Long>("backendId", backendId),
+					warningMessages);
+
+		} catch (Exception e) {
+
+			LOG.log(Level.SEVERE, "Unable to process backend create/update", e);
+
+			throw new HttpException("Unable to process backend create/update: " + e.getMessage(),
+					Http.Status.INTERNAL_SERVER_ERROR_500, e);
+		} finally {
+			userContext.unregister();
+		}
 	}
 
 	// PATCH:
 	// /backends/{projectLabel}/{backendLabel}/setContainersOf/{targetBackendLabel}
 	private void setContainersOfTargetBackend(ServerRequest serverRequest, ServerResponse serverResponse) {
+
+		if (!validateMasterInstance(serverResponse)) {
+			return;
+		}
+
 		try {
 			String projectLabel = serverRequest.path().param("projectLabel");
 			String backendLabel = serverRequest.path().param("backendLabel");
@@ -71,18 +121,16 @@ public class BackendService implements Service {
 					targetBackendLabel);
 
 			List<String> warningMessages = new ArrayList<>();
-			if (result && proxySyncProcessor.isSyncRequired()) {
-				proxySyncProcessor.syncToSlaveInstances(false, warningMessages);
-			}
 
-			serverResponse.send(warningMessages);
+			serverResponse.send(ServiceResult.create(result, "Switched containers to backend " + targetBackendLabel,
+					warningMessages));
 
 		} catch (Exception e) {
 
 			LOG.log(Level.SEVERE, "Unable to process backend container update", e);
 
-			throw new HttpException("Unable to process backend container update", Http.Status.INTERNAL_SERVER_ERROR_500,
-					e);
+			throw new HttpException("Unable to process backend container update: " + e.getMessage(),
+					Http.Status.INTERNAL_SERVER_ERROR_500, e);
 		} finally {
 			userContext.unregister();
 		}

@@ -18,14 +18,11 @@ package de.agitos.agiprx.rest;
 
 import io.helidon.security.integration.webserver.WebSecurity;
 import io.helidon.webserver.Routing.Rules;
-import io.helidon.webserver.Service;
 
-public class PingService implements Service {
-
-	private final boolean isMaster;
+public class PingService extends AbstractService {
 
 	public PingService(boolean isMaster) {
-		this.isMaster = isMaster;
+		super(isMaster);
 	}
 
 	@Override
