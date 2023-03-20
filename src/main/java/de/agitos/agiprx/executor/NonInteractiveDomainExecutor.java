@@ -210,9 +210,9 @@ public class NonInteractiveDomainExecutor extends AbstractCertificateRelatedExec
 		}
 
 		// persist config and reload
-		if (domainModification) {
-			haProxyProcessor.manageConfiguration(false, true);
-		}
+		// if (domainModification) {
+		// haProxyProcessor.manageConfiguration(false, true);
+		// }
 
 		// output handling of detached full syncs
 		if (massDomainUpdate.isFullSync()) {
@@ -244,7 +244,7 @@ public class NonInteractiveDomainExecutor extends AbstractCertificateRelatedExec
 			userContext.unregister();
 		}
 
-		LOG.info("Finished mass domain update.");
+		LOG.info("Finished mass domain update, " + (domainModification ? "changes occurred" : "no changes required"));
 
 		return warningMessages;
 	}

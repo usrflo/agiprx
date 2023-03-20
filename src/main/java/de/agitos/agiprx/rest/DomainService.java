@@ -66,9 +66,9 @@ public class DomainService extends AbstractService {
 		try {
 			userContext.registerApiUser(RestServiceUtil.getUsername(serverRequest));
 			List<String> warningMessages = nonInteractiveDomainExecutor.massDomainUpdate(massDomainUpdate);
-			if (proxySyncProcessor.isSyncRequired()) {
-				proxySyncProcessor.syncToSlaveInstances(false, warningMessages);
-			}
+			// if (proxySyncProcessor.isSyncRequired()) {
+			// proxySyncProcessor.syncToSlaveInstances(false, warningMessages);
+			// }
 			return warningMessages;
 
 		} catch (Exception e) {
