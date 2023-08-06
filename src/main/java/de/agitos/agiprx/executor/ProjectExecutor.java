@@ -31,6 +31,7 @@ import de.agitos.agiprx.db.exception.DuplicateKeyException;
 import de.agitos.agiprx.dto.DomainDto;
 import de.agitos.agiprx.exception.AbortionException;
 import de.agitos.agiprx.model.Backend;
+import de.agitos.agiprx.model.BackendContainer;
 import de.agitos.agiprx.model.Container;
 import de.agitos.agiprx.model.Domain;
 import de.agitos.agiprx.model.Project;
@@ -212,7 +213,7 @@ public class ProjectExecutor extends AbstractCertificateRelatedExecutor {
 		tableBuf.printTable(console, "\t");
 	}
 
-	private void find(String domainFilter) {
+	protected void find(String domainFilter) {
 
 		if (domainFilter == null) {
 			return;
@@ -224,13 +225,21 @@ public class ProjectExecutor extends AbstractCertificateRelatedExecutor {
 		List<Domain> result = domainDao.findAllWithFilterDomain(sqlFilter);
 
 		if (result.size() > 0) {
-			console.printlnfStress("Found " + domainFilter + " in projects/backends");
+			console.printlnfStress("Found " + domainFilter + " in project/backend/container");
 
 			for (Domain model : result) {
 				if (allAllowedProjectIds.contains(model.getBackend().getProject().getId())) {
-					console.printlnf("\tPROJ %d: %s BCKE %d: %s DOMAIN %d: %s", model.getBackend().getProject().getId(),
-							model.getBackend().getProject().getLabel(), model.getBackend().getId(),
-							model.getBackend().getLabel(), model.getId(), model.getDomain());
+					console.printlnf("\tPROJ %d: %s BCKE %d: %s PORT %d DOMAIN %d: %s",
+							model.getBackend().getProject().getId(), model.getBackend().getProject().getLabel(),
+							model.getBackend().getId(), model.getBackend().getLabel(), model.getBackend().getPort(),
+							model.getId(), model.getDomain());
+
+					for (BackendContainer backendContainer : model.getBackend().getBackendContainers()) {
+						console.printlnf("\tCONT %d: %s %s on HOST: %d: %s", backendContainer.getContainer().getId(),
+								backendContainer.getContainer().getLabel(), backendContainer.getContainer().getIpv6(),
+								backendContainer.getContainer().getHostId(),
+								backendContainer.getContainer().getHost().getHostname());
+					}
 				}
 			}
 		} else {
@@ -242,7 +251,7 @@ public class ProjectExecutor extends AbstractCertificateRelatedExecutor {
 		if (project == null) {
 			printHelp(CMD_LS + " [*label*]", "list projects, optionally filter by label, *-wildcard supported");
 			printHelp(CMD_FIND + " *domain*",
-					"list projects/backends that refer to a given domain, *-wildcard supported");
+					"list project/backend/container that refer to a given domain, *-wildcard supported");
 			printHelp(CMD_ADD, "add new project");
 			printHelp(CMD_USE + " <id>|<label>", "switch to project");
 		} else {

@@ -167,7 +167,9 @@ public class MainExecutor extends AbstractExecutor {
 						apiUserExecutor.run();
 					} else if (isCommand(CMD_PROJECTS, out)) {
 						projectExecutor.run();
-					} else if (isCommandWithParam(CMD_JUMP, out)) {
+					} else if (isCommandWithParam(CMD_FIND, out)) {
+						projectExecutor.find(getStringParam(out));
+					} else if (isAdmin && isCommandWithParam(CMD_JUMP, out)) {
 						searchBean.jump(getStringParam(out));
 					} else if (isCommandWithParam(CMD_CERTS, out)) {
 						haProxyProcessor.listCerts(getStringParam(out));
@@ -208,6 +210,8 @@ public class MainExecutor extends AbstractExecutor {
 
 	private void help() {
 		printHelp(CMD_PROJECTS, "list, add, edit and delete projects");
+		printHelp(CMD_FIND + " *domain*",
+				"list project/backend/container that refer to a given domain, *-wildcard supported");
 
 		if (userContext.isAdmin()) {
 			printHelp(CMD_JUMP + " [p|r|c|b|n] <*query*>",
@@ -232,12 +236,12 @@ public class MainExecutor extends AbstractExecutor {
 
 		if (proxySyncProcessor.isSyncRequired()) {
 			console.setCommandCompletion(CMD_HELP, CMD_ABORT, CMD_CANCEL, CMD_CDUP, CMD_TOP, CMD_EXIT, CMD_QUIT,
-					CMD_PROJECTS, CMD_JUMP, CMD_USERS, CMD_APIUSERS, CMD_HOSTS, CMD_CERTS, CMD_GENHAPRX,
+					CMD_PROJECTS, CMD_FIND, CMD_JUMP, CMD_USERS, CMD_APIUSERS, CMD_HOSTS, CMD_CERTS, CMD_GENHAPRX,
 					CMD_WRITESSHPRX, CMD_SYNCSLAVES);
 
 		} else {
 			console.setCommandCompletion(CMD_HELP, CMD_ABORT, CMD_CANCEL, CMD_CDUP, CMD_TOP, CMD_EXIT, CMD_QUIT,
-					CMD_PROJECTS, CMD_JUMP, CMD_USERS, CMD_APIUSERS, CMD_HOSTS, CMD_CERTS, CMD_GENHAPRX,
+					CMD_PROJECTS, CMD_FIND, CMD_JUMP, CMD_USERS, CMD_APIUSERS, CMD_HOSTS, CMD_CERTS, CMD_GENHAPRX,
 					CMD_WRITESSHPRX);
 		}
 	}
