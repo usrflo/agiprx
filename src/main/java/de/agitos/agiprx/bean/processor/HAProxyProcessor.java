@@ -473,10 +473,16 @@ public class HAProxyProcessor extends AbstractProcessor implements DependencyInj
 					try {
 						certInfo = new CertInfo(certFilename);
 						moveCertToArchive(certFilename, certInfo.getCert().getNotAfter(), true);
-						warningMessages
-								.add("Detected replaced cert " + certFilename + ", moved to archive " + ARCHIVE_PATH);
+						if (warningMessages != null) {
+							warningMessages.add(
+									"Detected replaced cert " + certFilename + ", moved to archive " + ARCHIVE_PATH);
+						}
 					} catch (Exception ioe) {
-						warningMessages.add("Could not move replaced certificate " + certFilename + " to archive");
+						String msg = "Could not move replaced certificate " + certFilename + " to archive";
+						if (warningMessages != null) {
+							warningMessages.add(msg);
+						}
+						console.printlnfError(msg);
 					}
 				}
 
