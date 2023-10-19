@@ -17,7 +17,7 @@ rsync -azHAX -e'ssh -p2222 -o StrictHostKeyChecking=no' --timeout=300 --inplace 
 rsync -azHAX -e'ssh -p2222 -o StrictHostKeyChecking=no' --timeout=300 /opt/agiprx/.ssh/authorized_keys root@[$SLAVEIP]:/opt/agiprx/.ssh/authorized_keys
 
 # transfer and import database
-mysqldump --defaults-file=/etc/mysql/debian.cnf --opt --single-transaction --order-by-primary --flush-logs --events --routines agiprx | ssh -p2222 root@$SLAVEIP mysql --defaults-file=/etc/mysql/debian.cnf agiprx
+mysqldump --defaults-file=/etc/mysql/debian.cnf --opt --single-transaction --order-by-primary --flush-logs --events --routines agiprx | ssh -p2222 -o StrictHostKeyChecking=no root@$SLAVEIP mysql --defaults-file=/etc/mysql/debian.cnf agiprx
 
 # restart agiprx to re-generate HAProxy config and reload and to re-generate SSH proxy config
 ssh -p2222 -o StrictHostKeyChecking=no root@$SLAVEIP '/usr/bin/systemctl restart agiprx'
