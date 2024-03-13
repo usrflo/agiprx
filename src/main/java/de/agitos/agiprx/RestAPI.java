@@ -35,6 +35,7 @@ import de.agitos.agiprx.rest.ProjectService;
 import de.agitos.agiprx.util.Assert;
 import de.agitos.agiprx.util.EmailSender;
 import io.helidon.media.jsonb.JsonbSupport;
+import io.helidon.openapi.OpenAPISupport;
 import io.helidon.security.Security;
 import io.helidon.security.integration.webserver.WebSecurity;
 import io.helidon.security.providers.httpauth.HttpBasicAuthProvider;
@@ -89,6 +90,11 @@ public class RestAPI implements DependencyInjector {
 			routingBuilder.register("/containers", new ContainerService(isMaster));
 			routingBuilder.register("/backends", new BackendService(isMaster));
 			routingBuilder.register("/maintenance", new MaintenanceService(isMaster));
+
+			// add OpenAPI support
+			// io.helidon.config.Config apiConfig = io.helidon.config.Config.create();
+			// routingBuilder.register(OpenAPISupport.create(apiConfig));
+			routingBuilder.register(OpenAPISupport.create());
 
 			// TODO: enable access logs?
 			// routingBuilder.register(AccessLogSupport.create(config.get("server.access-log")));

@@ -1,0 +1,518 @@
+openapi: 3.1.0
+info:
+  title: AgiPrx API
+  license:
+    name: GPLv3
+    url: https://raw.githubusercontent.com/usrflo/agiprx/master/COPYING
+  version: 1.0.0
+externalDocs:
+  description: Project README
+  url: https://github.com/usrflo/agiprx
+servers:
+- url: https://localhost:8002/
+- url: http://localhost:8002/
+paths:
+  /test/ping:
+    get:
+      summary: test api availability
+      responses:
+        "200":
+          description: successful operation
+          content: {}
+  /test/authping:
+    get:
+      summary: test api availability and user authentication
+      responses:
+        "200":
+          description: successful operation
+          content: {}
+        "401":
+          description: unauthorized
+          content: {}
+      security:
+      - user_auth: []
+  /admin/gensynchaprx:
+    get:
+      summary: "generate config, reload HAProxy and synchronize the config to slave\
+        \ servers"
+      responses:
+        "401":
+          description: unauthorized
+          content: {}
+        "405":
+          description: Job needs to be started on master instance (this is a slave
+            instance)
+          content: {}
+        "423":
+          description: Job is already running
+          content: {}
+        "500":
+          description: Unable to reload and sync of HAProxy
+          content: {}
+        "200":
+          description: processing succeeded; warnings may be included in the response
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ListOfWarnings'
+      security:
+      - user_auth: []
+  /admin/writesshprx:
+    get:
+      summary: generate SSH proxy config
+      responses:
+        "401":
+          description: unauthorized
+          content: {}
+        "405":
+          description: Job needs to be started on master instance (this is a slave
+            instance)
+          content: {}
+        "423":
+          description: Job is already running
+          content: {}
+        "200":
+          description: job was started as detached process; warnings may be included
+            in the response
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ListOfWarnings'
+      security:
+      - user_auth: []
+  /domains/{projectLabel}:
+    get:
+      summary: get configured domains inside a project
+      parameters:
+      - name: projectLabel
+        in: path
+        description: label of a project
+        required: true
+        schema:
+          type: string
+      responses:
+        "401":
+          description: unauthorized
+          content: {}
+        "200":
+          description: list of configured project domains
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/MapOfDomains'
+      security:
+      - user_auth: []
+  /domains/{projectLabel}/{backendLabel}:
+    get:
+      summary: get configured domains inside a backend of a project
+      parameters:
+      - name: projectLabel
+        in: path
+        description: label of a project
+        required: true
+        schema:
+          type: string
+      - name: backendLabel
+        in: path
+        description: label of a project backend
+        required: true
+        schema:
+          type: string
+      responses:
+        "401":
+          description: unauthorized
+          content: {}
+        "200":
+          description: list of configured backend domains inside a project
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/MapOfDomains'
+      security:
+      - user_auth: []
+  /domains/massupdate:
+    post:
+      requestBody:
+        description: Object with mass domain update definition
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/MassDomainUpdate'
+        required: true
+      responses:
+        "401":
+          description: unauthorized
+          content: {}
+        "500":
+          description: unable to process mass update
+          content: {}
+        "200":
+          description: list of configured backend domains inside a project
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ListOfWarnings'
+      security:
+      - user_auth: []
+      x-codegen-request-body-name: body
+  /projects:
+    get:
+      responses:
+        "401":
+          description: unauthorized
+          content: {}
+        "200":
+          description: list of projects the user has access to
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ListOfProjects'
+      security:
+      - user_auth: []
+  /projects/{projectLabel}:
+    get:
+      description: fetch project details
+      parameters:
+      - name: projectLabel
+        in: path
+        description: label of a project
+        required: true
+        schema:
+          type: string
+      responses:
+        "401":
+          description: unauthorized
+          content: {}
+        "200":
+          description: list of project details
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Project'
+      security:
+      - user_auth: []
+  /containers/{projectLabel}:
+    post:
+      description: create or update container in project
+      parameters:
+      - name: projectLabel
+        in: path
+        description: label of a project
+        required: true
+        schema:
+          type: string
+      requestBody:
+        description: container to create or update
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/Container'
+        required: true
+      responses:
+        "401":
+          description: unauthorized
+          content: {}
+        "500":
+          description: unable to create or update container
+          content: {}
+        "200":
+          description: containerId of created or updated container
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  isSuccess:
+                    type: boolean
+                  payload:
+                    type: object
+                    properties:
+                      key:
+                        type: string
+                      value:
+                        type: integer
+                        format: int64
+                  warnings:
+                    $ref: '#/components/schemas/ListOfWarnings'
+      security:
+      - user_auth: []
+      x-codegen-request-body-name: body
+  /backends/{projectLabel}:
+    post:
+      description: create or update backend in project
+      parameters:
+      - name: projectLabel
+        in: path
+        description: label of a project
+        required: true
+        schema:
+          type: string
+      requestBody:
+        description: backend to create or update
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/Backend'
+        required: true
+      responses:
+        "401":
+          description: unauthorized
+          content: {}
+        "500":
+          description: unable to create or update backend
+          content: {}
+        "200":
+          description: backendId of created or updated backend
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  isSuccess:
+                    type: boolean
+                  payload:
+                    type: object
+                    properties:
+                      key:
+                        type: string
+                      value:
+                        type: integer
+                        format: int64
+                  warnings:
+                    $ref: '#/components/schemas/ListOfWarnings'
+      security:
+      - user_auth: []
+      x-codegen-request-body-name: body
+  /backends/{projectLabel}/{backendLabel}/setContainersOf/{targetBackendLabel}:
+    patch:
+      description: switch backend containers of a backend to those of another backend
+      parameters:
+      - name: projectLabel
+        in: path
+        description: label of a project
+        required: true
+        schema:
+          type: string
+      - name: backendLabel
+        in: path
+        description: label of a backend
+        required: true
+        schema:
+          type: string
+      - name: targetBackendLabel
+        in: path
+        description: label of another backend whose containers should be set to the
+          backend
+        required: true
+        schema:
+          type: string
+      responses:
+        "401":
+          description: unauthorized
+          content: {}
+        "500":
+          description: unable to process backend container update
+          content: {}
+        "200":
+          description: backendId of created or updated backend
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  isSuccess:
+                    type: boolean
+                  payload:
+                    type: object
+                    properties:
+                      key:
+                        type: string
+                      value:
+                        type: integer
+                        format: int64
+                  warnings:
+                    $ref: '#/components/schemas/ListOfWarnings'
+      security:
+      - user_auth: []
+  /maintenance/start:
+    get:
+      description: Start maintenance process to check/renew SSL certificates
+      responses:
+        "401":
+          description: unauthorized
+          content: {}
+        "423":
+          description: job is already running
+          content: {}
+        "200":
+          description: job started in detached mode
+          content: {}
+      security:
+      - user_auth: []
+components:
+  schemas:
+    ListOfWarnings:
+      type: array
+      items:
+        type: string
+    ListOfProjects:
+      type: array
+      items:
+        type: string
+    Domain:
+      type: object
+      properties:
+        domainName:
+          type: string
+        backendLabel:
+          type: string
+        letsEncrypt:
+          type: boolean
+        certProvided:
+          type: boolean
+        redirectToUrl:
+          type: string
+    BackendContainer:
+      type: object
+      properties:
+        containerId:
+          type: integer
+          format: int64
+        backendId:
+          type: integer
+          format: int64
+        params:
+          type: string
+    Backend:
+      type: object
+      properties:
+        label:
+          type: string
+        fullname:
+          type: string
+        projectId:
+          type: integer
+          format: int64
+        port:
+          type: integer
+          format: int32
+        params:
+          type: string
+        domainForwardings:
+          type: array
+          items:
+            $ref: '#/components/schemas/Domain'
+        backendContainers:
+          type: array
+          items:
+            $ref: '#/components/schemas/BackendContainer'
+    User:
+      type: object
+      properties:
+        fullname:
+          type: string
+        email:
+          type: string
+        sshPublicKey:
+          type: string
+        role:
+          type: string
+        defaultPermission:
+          type: string
+        agiPrxPermission:
+          type: string
+    ContainerPermission:
+      type: object
+      properties:
+        userId:
+          type: integer
+          format: int64
+        user:
+          $ref: '#/components/schemas/User'
+        permission:
+          type: string
+        sshProxyUsername:
+          type: string
+    Container:
+      type: object
+      properties:
+        label:
+          type: string
+        fullname:
+          type: string
+        projectId:
+          type: integer
+          format: int64
+        hostId:
+          type: integer
+          format: int64
+        hostname:
+          type: string
+        ipv6:
+          type: string
+        containerPermissions:
+          type: array
+          items:
+            $ref: '#/components/schemas/ContainerPermission'
+    Project:
+      type: object
+      properties:
+        label:
+          type: string
+        fullname:
+          type: string
+        backends:
+          type: array
+          items:
+            $ref: '#/components/schemas/Backend'
+        containers:
+          type: array
+          items:
+            $ref: '#/components/schemas/Container'
+    MapOfDomains:
+      type: object
+      additionalProperties:
+        $ref: '#/components/schemas/Domain'
+    MassDomainUpdate:
+      type: object
+      properties:
+        fullSync:
+          type: boolean
+          description: set to true if all domains not included in this configuration
+            should be removed
+        domainOperations:
+          type: array
+          items:
+            type: object
+            properties:
+              operation:
+                type: string
+                description: "Hint: CREATE, UPDATE and REPLACE are synonyms; there\
+                  \ is an update if a domain name exists, else a create"
+                enum:
+                - CREATE
+                - UPDATE
+                - REPLACE
+                - DELETE
+              domainName:
+                type: string
+                description: "Domain to create, update or delete"
+              projectLabel:
+                type: string
+                description: project reference; all operations need to refer to the
+                  same project
+              backendLabel:
+                type: string
+                description: backend reference
+              enableSSL:
+                type: boolean
+                description: the server decides whether to use an existing certificate
+                  or create a new Let's Encrypt certificate
+              redirectToUrl:
+                type: string
+                description: "optional parameter to redirect to target URL; a trailing\
+                  \ * keeps the path, e.g. https://foo.org/*"
+  securitySchemes:
+    user_auth:
+      type: http
+      scheme: basic
