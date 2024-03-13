@@ -295,7 +295,11 @@ public class ContainerExecutor extends AbstractExecutor {
 			handleExitOrAbort(out);
 
 			if (StringUtils.isEmptyOrWhitespaceOnly(out)) {
-				break;
+				if (model.getIpv6() == null) {
+					console.printlnfError("An IPv6 needs to be set");
+				} else {
+					break;
+				}
 			} else if (validator.isIPv6(out)) {
 				model.setIpv6(out);
 				break;
