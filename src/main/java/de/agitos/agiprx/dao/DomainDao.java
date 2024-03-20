@@ -178,6 +178,11 @@ public class DomainDao extends AbstractDao implements DependencyInjector {
 				new int[] { Types.VARCHAR }, new DomainRowMapper());
 		for (Domain domain : result) {
 			initBackRelations(domain);
+			if (domain.getBackend() == null || domain.getBackend().getProject() == null) {
+				// TODO FS, remove this exception as soon as error reason is captured
+				throw new RuntimeException(
+						"Could not find backend or project for domain on search with filter '" + filter + "'");
+			}
 		}
 		return result;
 	}
