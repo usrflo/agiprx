@@ -17,6 +17,7 @@
 package de.agitos.agiprx.executor;
 
 import java.io.IOException;
+import java.util.List;
 import java.util.logging.Logger;
 
 import de.agitos.agiprx.ConsoleWrapper;
@@ -105,12 +106,51 @@ public class NonInteractiveContainerExecutor extends AbstractExecutor {
 		return null;
 	}
 
+	private Host checkAndFindHost(ContainerDto containerDto, boolean force) {
+
+		String hostname = containerDto.getHostname();
+		if (containerDto.getHost() != null) {
+			hostname = containerDto.getHost().getHostname();
+		}
+
+		if (hostname != null) {
+			return checkAndFindHost(hostname);
+		}
+
+		if (containerDto.getHostId() != null) {
+			return checkAndFindHost(containerDto.getHostId());
+		}
+
+		if (force) {
+			throw new RuntimeException("Invalid host: no hostname or host id available in input");
+		}
+
+		return null;
+	}
+
 	private Host checkAndFindHost(String hostname) {
 		Host host = hostDao.find(hostname);
 		if (host == null) {
-			throw new RuntimeException("Invalid host: name" + hostname + " not existing or access denied");
+			throw new RuntimeException("Invalid host: name " + hostname + " not existing or access denied");
 		}
 		return host;
+	}
+
+	private Host checkAndFindHost(Long id) {
+		Host host = hostDao.find(id);
+		if (host == null) {
+			throw new RuntimeException("Invalid host: id " + id + " not existing or access denied");
+		}
+		return host;
+	}
+
+	private void checkPermissionsFromInput(List<ContainerPermission> containerPermissions) {
+
+		throw new RuntimeException("Changing container permissions is currently disabled for security reasons");
+
+		// for (ContainerPermission containerPermission : containerPermissions) {
+		// TODO
+		// }
 	}
 
 	/**
@@ -141,12 +181,14 @@ public class NonInteractiveContainerExecutor extends AbstractExecutor {
 			// create new container
 			container.setProjectId(project.getId());
 
-			Host host = checkAndFindHost(containerDto.getHost().getHostname());
-			container.setHost(host);
+			container.setHost(checkAndFindHost(containerDto, true));
 
 			containerDao.create(container);
 
 			if (container.getContainerPermissions() != null) {
+
+				checkPermissionsFromInput(container.getContainerPermissions());
+
 				for (ContainerPermission containerPermission : container.getContainerPermissions()) {
 					containerPermission.setContainer(container);
 					containerPermissionDao.create(containerPermission);
@@ -168,12 +210,14 @@ public class NonInteractiveContainerExecutor extends AbstractExecutor {
 				existingContainer.setIpv6(container.getIpv6());
 			}
 
-			Host host = checkAndFindHost(containerDto.getHost().getHostname());
-			if (host.getId() != existingContainer.getHostId()) {
+			Host host = checkAndFindHost(containerDto, false);
+			if (host != null && host.getId() != existingContainer.getHostId()) {
 				existingContainer.setHost(host);
 			}
 
 			if (container.getContainerPermissions() != null) {
+
+				checkPermissionsFromInput(container.getContainerPermissions());
 
 				for (ContainerPermission containerPermission : existingContainer.getContainerPermissions()) {
 					containerPermissionDao.delete(containerPermission);
