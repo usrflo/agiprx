@@ -9,7 +9,6 @@ externalDocs:
   description: Project README
   url: https://github.com/usrflo/agiprx
 servers:
-- url: https://localhost:8002/
 - url: http://localhost:8002/
 paths:
   /test/ping:
@@ -132,6 +131,7 @@ paths:
       - user_auth: []
   /domains/massupdate:
     post:
+      summary: partial or full update of domains inside a project 
       requestBody:
         description: Object with mass domain update definition
         content:
@@ -157,6 +157,7 @@ paths:
       x-codegen-request-body-name: body
   /projects:
     get:
+      summary: fetch all projects the user has access to
       responses:
         "401":
           description: unauthorized
@@ -171,7 +172,7 @@ paths:
       - user_auth: []
   /projects/{projectLabel}:
     get:
-      description: fetch project details
+      summary: fetch project details
       parameters:
       - name: projectLabel
         in: path
@@ -193,7 +194,7 @@ paths:
       - user_auth: []
   /containers/{projectLabel}:
     post:
-      description: create or update container in project
+      summary: create or update container in project
       parameters:
       - name: projectLabel
         in: path
@@ -222,7 +223,7 @@ paths:
               schema:
                 type: object
                 properties:
-                  isSuccess:
+                  success:
                     type: boolean
                   payload:
                     type: object
@@ -239,7 +240,7 @@ paths:
       x-codegen-request-body-name: body
   /backends/{projectLabel}:
     post:
-      description: create or update backend in project
+      summary: create or update backend in project
       parameters:
       - name: projectLabel
         in: path
@@ -268,7 +269,7 @@ paths:
               schema:
                 type: object
                 properties:
-                  isSuccess:
+                  success:
                     type: boolean
                   payload:
                     type: object
@@ -285,7 +286,7 @@ paths:
       x-codegen-request-body-name: body
   /backends/{projectLabel}/{backendLabel}/setContainersOf/{targetBackendLabel}:
     patch:
-      description: switch backend containers of a backend to those of another backend
+      summary: switch backend containers of a backend to those of another backend
       parameters:
       - name: projectLabel
         in: path
@@ -320,23 +321,17 @@ paths:
               schema:
                 type: object
                 properties:
-                  isSuccess:
+                  success:
                     type: boolean
                   payload:
-                    type: object
-                    properties:
-                      key:
-                        type: string
-                      value:
-                        type: integer
-                        format: int64
+                    type: string
                   warnings:
                     $ref: '#/components/schemas/ListOfWarnings'
       security:
       - user_auth: []
   /maintenance/start:
     get:
-      description: Start maintenance process to check/renew SSL certificates
+      summary: Start maintenance process to check/renew SSL certificates
       responses:
         "401":
           description: unauthorized
@@ -351,6 +346,9 @@ paths:
       - user_auth: []
 components:
   schemas:
+    Version:
+      type: integer
+      format: int32
     ListOfWarnings:
       type: array
       items:
@@ -359,8 +357,19 @@ components:
       type: array
       items:
         type: string
+    Host:
+      type: object
+      properties:
+        hostname:
+          type: string
+        ipv6:
+          type: string
+        version:
+          $ref: '#/components/schemas/Version'
     Domain:
       type: object
+      required:
+      - domainName
       properties:
         domainName:
           type: string
@@ -372,8 +381,13 @@ components:
           type: boolean
         redirectToUrl:
           type: string
+        version:
+          $ref: '#/components/schemas/Version'
     BackendContainer:
       type: object
+      required:
+      - containerId
+      - backendId
       properties:
         containerId:
           type: integer
@@ -383,10 +397,16 @@ components:
           format: int64
         params:
           type: string
+        version:
+          $ref: '#/components/schemas/Version'
     Backend:
       type: object
+      required:
+      - label
       properties:
         label:
+          type: string
+        FQLabel:
           type: string
         fullname:
           type: string
@@ -398,6 +418,8 @@ components:
           format: int32
         params:
           type: string
+        globalBackend:
+          type: boolean
         domainForwardings:
           type: array
           items:
@@ -406,8 +428,12 @@ components:
           type: array
           items:
             $ref: '#/components/schemas/BackendContainer'
+        version:
+          $ref: '#/components/schemas/Version'
     User:
       type: object
+      required:
+      - email
       properties:
         fullname:
           type: string
@@ -418,12 +444,23 @@ components:
         role:
           type: string
         defaultPermission:
-          type: string
+          type: array
+          items:
+            type: string
         agiPrxPermission:
-          type: string
+          type: array
+          items:
+            type: string
+        version:
+          $ref: '#/components/schemas/Version'
     ContainerPermission:
       type: object
+      required:
+      - permission
       properties:
+        containerId:
+          type: integer
+          format: int64
         userId:
           type: integer
           format: int64
@@ -433,10 +470,16 @@ components:
           type: string
         sshProxyUsername:
           type: string
+        version:
+          $ref: '#/components/schemas/Version'
     Container:
       type: object
+      required:
+      - label
       properties:
         label:
+          type: string
+        FQLabel:
           type: string
         fullname:
           type: string
@@ -448,14 +491,20 @@ components:
           format: int64
         hostname:
           type: string
+        host:
+          $ref: '#/components/schemas/Host'
         ipv6:
           type: string
         containerPermissions:
           type: array
           items:
             $ref: '#/components/schemas/ContainerPermission'
+        version:
+          $ref: '#/components/schemas/Version'
     Project:
       type: object
+      required:
+      - label
       properties:
         label:
           type: string
@@ -469,6 +518,8 @@ components:
           type: array
           items:
             $ref: '#/components/schemas/Container'
+        version:
+          $ref: '#/components/schemas/Version'
     MapOfDomains:
       type: object
       additionalProperties:

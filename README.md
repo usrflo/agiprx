@@ -30,7 +30,51 @@ Then you get an idea what AgiPrx can be used for:
 
 ## Master-Slave-Setup
 
+In the optional master-slave setup AgiPrx instances are configured with one master and 1..n slaves: all configurations including database and certificate data can be synchronized to slave servers via a sync-command after a configuration change to prevent a single point of failure regarding AgiPrx, HAProxy and the SSH Proxy setup.
+The slave instances can be used as failover or active frontend servers for HAProxy and the SSH access. See [Master-Slave Setup and Failover instructions](https://github.com/usrflo/agiprx-setup/blob/master/Setup-Production.md#optional-master-slave-setup).
+
 ![AgiPrx-Master-Slave-Setup](docs/agiprx-master-slave.svg)
+
+## Usage Instructions
+
+### Add Hosts
+
+Hosts are used as logical units that contain containers (e.g. virtual machines, application or system containers or services on the host system itself).
+These logical units can be used to select all containers/backends that fail if the host system went down. Hosts need to be configured in the first step.
+
+### Add Users
+
+Users need to be added with
+
+* fullname, e.g. 'Florian Sager', 'Generic Customer', 'Deployment User X'
+* email address for sending out notifications like account data or admin error messages on batch processing
+* valid SSH key
+* role:
+    * ADMIN: full access to AgiPrx
+    * USER: limited access to AgiPrx
+        * without user, host and API administration
+        * without search functionality (may be allowed in the future)
+        * limited to a configured set of projects via 'AgiPrx project permissions', see below
+    * CONTACT: user has not access to AgiPrx
+ * default technical user permission in target environments/containers. A list of e.g. 'root,www-data' allows to access the target environment by root and www-data by default if added by a 'groupadd' command (see below).
+
+### Create new Project, Container, Permissions, Backend and Domain
+
+There is an initial setup wizard to configure a new container with SSH access and HAProxy backend configuration [TODO]
+
+### Configure multiple Backends per Container
+
+[TODO]
+
+### Configure hot-standby Container
+
+[TODO]
+
+### Sync configuration to Slave AgiPrx-Servers
+
+A manual sync can be triggered by the 'syncslaves' command from the main menu.
+
+An automatic sync is triggered at the end of every maintenance job execution.
 
 ## Setup and System Requirements
 
@@ -51,15 +95,105 @@ Then you get an idea what AgiPrx can be used for:
 
 See repository [AgiPrx-Setup](https://github.com/usrflo/agiprx-setup) for an automated deployment by ansible.
 
+### HAProxy defaults
+
+See and adapt [etc/haproxy/haproxy-header.cfg](etc/haproxy/haproxy-header.cfg) and [etc/haproxy/haproxy-footer.cfg](etc/haproxy/haproxy-footer.cfg) to suffice your needs.
+The HAProxy configuration file generator combines haproxy-header.cfg, an auto-generated backend list and haproxy-footer.cfg to a haproxy.cfg target file that is validated before a HAProxy reload is executed.
+A generated backend contains a redirect from HTTP to HTTPS in case a SSL certificate is configured and available.
+
+### SSH Proxy defaults
+
+The AgiPrx instance(s) use a configured private SSH key to access target environments on proxied connections. It's the task of the administrator to assure that the according
+public SSH key is authorized on the target environments. Currently there is a single SSH key used for all target environments. Although functionally not required there is
+potential to extend AgiPrx to use several private keys in the proxy setup and choose the required key on each permission configuration.
+
+### Maintenance Job
+
+The maintenance job should be executed once a day to
+
+ * check if IPs of productive domain names are equal to the proxy IPs, otherwise inform about DNS issues
+ * check if configured certificates will reach end-of-life in configured notification period for domains not in error, notify in case of end-of-live
+ * generate Let's Encrypt certificates if configured and not available for domains not in error state + renew existing certs
+ * generate new SSL certificate mappings
+ * sync to slave instances if defined
+
+The maintenance job can be either triggered via SSH command or via the AgiPrx API. See details in [Setup-Production](https://github.com/usrflo/agiprx-setup/blob/master/Setup-Production.md).
+
 ## REST-Interface
 
-See **/agiprx/src/main/java/de/agitos/agiprx/rest** for current implementation status.
-`TODO: add interface documentation`
+### Implementation
+
+Package of the REST service implementation: [src/main/java/de/agitos/agiprx/rest](src/main/java/de/agitos/agiprx/rest)
+
+Definition by OpenAPI 3, see [src/main/resources/META-INF/openapi.yml](src/main/resources/META-INF/openapi.yml) or http(s)://[host]:8002/openapi
+
+### Operations
+
+```
+GET /test/ping
+test api availability
+
+GET /test/authping
+test api availability and user authentication
+
+GET /admin/gensynchaprx
+generate config, reload HAProxy and synchronize the config to slave servers
+
+GET /admin/writesshprx
+generate SSH proxy config
+
+GET /domains/{projectLabel}
+get configured domains inside a project
+
+GET /domains/{projectLabel}/{backendLabel}
+get configured domains inside a backend of a project
+
+POST /domains/massupdate
+partial or full update of domains inside a project
+
+GET /projects
+fetch all projects the user has access to
+
+GET /projects/{projectLabel}
+fetch project details
+
+POST /containers/{projectLabel}
+create or update container in project
+
+POST /backends/{projectLabel}
+create or update backend in project
+
+PATCH /backends/{projectLabel}/{backendLabel}/setContainersOf/{targetBackendLabel}
+switch backend containers of a backend to those of another backend
+
+GET /maintenance/start
+Start maintenance process to check/renew SSL certificates
+```
+
+### API via TLS
+
+To configure access to the ApiPrx-API via https create a new backend with target port 8002 that is linked to a container configuration for ipv6 [::1].
+Configure a long timeout 'timeout server 240000' as HAProxy param in the backend configuration.
+
+As a result the generated backend section inside haproxy.cfg will look like:
+
+```
+backend agiprx_123_api
+        timeout server 240000
+        redirect scheme https if !{ ssl_fc } { req.hdr(host),lower,map_str(/etc/haproxy/domain2cert.map) -m found }
+        server agiprx-server.my.tld_agiprx-api [::1]:8002
+```
+
+### API-Access
+
+The access to the API is granted to api users configured by admin users in the main menu entry 'api-users'; there is an optional limitation to specific projects by a list of project labels (wildcards can be used).
+
+![AgiPrx-Api-Users](docs/agiprx-console-api-users.png)
 
 ## TODO List
 
+- configurable AgiPrx-API port (it's currently fixed to port number 8002)
 - run AgiPrx as non-root: assure that HAProxy can be reloaded by sudo permissions, assure that AgiPrx can create/update/remove local system users by sudo permissions, assure that certbot can create Letsencrypt certificates with limited permissions, assure that slave proxy sync can be executed without root permissions
-- USER role: extended backend configuration, prevent malicious parameter configuration
 - USER role: remove permission to assign any ip address to containers to prevent foreign container access inside the group of configured users if default SSH key is used internally
 - add optional editing of individual user-specific SSH private keys in permission handling (replacement of default SSH key)
 - add audit tables to track changes to the database
