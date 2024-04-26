@@ -154,8 +154,7 @@ public class Backend extends AbstractModel {
 		} else if (this.getBackendContainers().size() == 0) {
 			buf.append(String.format(linePrefix + "Warning: no containers assigned, backend is non-functional."));
 		} else {
-			HAProxyBackendFormatter backendFormatter = new HAProxyBackendFormatter();
-			backendFormatter.formatBackend(this, buf, linePrefix);
+			HAProxyBackendFormatter.getBean().formatBackend(this, buf, linePrefix);
 		}
 
 		// add domain info

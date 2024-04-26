@@ -41,6 +41,9 @@ domain.trustedIps=1.2.3.4
 # HAProxy reload command
 haproxy.reloadCommand=/usr/bin/systemctl reload haproxy
 
+# HAProxy redirect code http -> https: 301 (default) or 302
+haproxy.httpsRedirectCode=301
+
 # informative SSH proxy domainname and port for end-user notifications 
 proxy.domainname=proxy.example.org
 proxy.port=2222

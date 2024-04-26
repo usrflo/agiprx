@@ -18,11 +18,34 @@ package de.agitos.agiprx.output;
 
 import com.mysql.cj.util.StringUtils;
 
+import de.agitos.agiprx.DependencyInjector;
+import de.agitos.agiprx.bean.Config;
 import de.agitos.agiprx.bean.processor.HAProxyProcessor;
 import de.agitos.agiprx.model.Backend;
 import de.agitos.agiprx.model.BackendContainer;
+import de.agitos.agiprx.util.Assert;
 
-public class HAProxyBackendFormatter {
+public class HAProxyBackendFormatter implements DependencyInjector {
+
+	private static HAProxyBackendFormatter BEAN;
+
+	private Integer haProxyHttpsRedirectCode;
+
+	public HAProxyBackendFormatter() {
+
+		Assert.singleton(this, BEAN);
+		BEAN = this;
+
+		haProxyHttpsRedirectCode = Config.getBean().getInteger("haproxy.httpsRedirectCode", 301);
+	}
+
+	@Override
+	public void postConstruct() {
+	}
+
+	public static HAProxyBackendFormatter getBean() {
+		return BEAN;
+	}
 
 	public void formatBackend(Backend backend, StringBuilder buf) {
 		formatBackend(backend, buf, "");
@@ -68,7 +91,8 @@ public class HAProxyBackendFormatter {
 	}
 
 	private void addConditionalSSLRedirect(StringBuilder buf, String linePrefix) {
-		buf.append(linePrefix).append("\t").append("redirect scheme https if !{ ssl_fc } ");
+		buf.append(linePrefix).append("\t").append("redirect scheme https code ").append(haProxyHttpsRedirectCode)
+				.append(" if !{ ssl_fc } ");
 		buf.append("{ req.hdr(host),lower,map_str(")
 				.append(HAProxyProcessor.CONFIG_PATH + HAProxyProcessor.DOMAIN_TO_CERT_FILE).append(") -m found }")
 				.append("\n");

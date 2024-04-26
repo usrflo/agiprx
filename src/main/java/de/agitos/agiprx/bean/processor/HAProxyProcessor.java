@@ -214,7 +214,7 @@ public class HAProxyProcessor extends AbstractProcessor implements DependencyInj
 		haproxyLesslBackendProcessor.generateLesslBackend(buf);
 
 		// append main config from agiprx db (backend sections only)
-		HAProxyBackendFormatter backendFormatter = new HAProxyBackendFormatter();
+		HAProxyBackendFormatter backendFormatter = HAProxyBackendFormatter.getBean();
 
 		for (Project project : allProjects) {
 

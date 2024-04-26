@@ -180,7 +180,7 @@ As a result the generated backend section inside haproxy.cfg will look like:
 ```
 backend agiprx_123_api
         timeout server 240000
-        redirect scheme https if !{ ssl_fc } { req.hdr(host),lower,map_str(/etc/haproxy/domain2cert.map) -m found }
+        redirect scheme https code 301 if !{ ssl_fc } { req.hdr(host),lower,map_str(/etc/haproxy/domain2cert.map) -m found }
         server agiprx-server.my.tld_agiprx-api [::1]:8002
 ```
 

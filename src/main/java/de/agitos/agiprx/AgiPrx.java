@@ -61,6 +61,7 @@ import de.agitos.agiprx.executor.NonInteractiveDomainExecutor;
 import de.agitos.agiprx.executor.NonInteractiveProjectExecutor;
 import de.agitos.agiprx.executor.ProjectExecutor;
 import de.agitos.agiprx.executor.UserExecutor;
+import de.agitos.agiprx.output.HAProxyBackendFormatter;
 import de.agitos.agiprx.util.Assert;
 import de.agitos.agiprx.util.EmailSender;
 import de.agitos.agiprx.util.UserContext;
@@ -133,6 +134,7 @@ public class AgiPrx {
 		diList.add(new DomainDao());
 		diList.add(new DomainIpChecker());
 		diList.add(new EmailSender());
+		diList.add(new HAProxyBackendFormatter());
 		diList.add(new HAProxyLesslBackendProcessor());
 		diList.add(new HAProxyProcessor());
 		diList.add(new HostDao());
